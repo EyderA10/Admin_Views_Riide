@@ -1,0 +1,48 @@
+* {
+    padding: 0;
+    margin: 0;
+}
+
+html, body {
+    background-color: lightgray;
+}
+
+.menu-icon-user {
+    height: 60px;
+    width: 100%;
+}
+
+.icono-user-span {
+    color: black;
+    font-size: 18px;
+    text-transform: capitalize;
+
+}
+
+.icono-user-span .fa-user {
+    font-size: 20px;
+    margin-right: 5px;
+}
+.float-right {
+    margin-right: 5px;
+}
+.img-user {
+    width: 40px;
+    height: 40px;
+    border-radius: 60px;
+}
+
+.fa-angle-down {
+    font-size: 16px;
+    color: lightseagreen;
+    margin-left: 5px;
+}
+
+.container .register .color-secondary {
+    color: lightseagreen;
+}
+
+.container .register .color-secondary .fa-save {
+    color: white;
+    font-size: 10px;
+}
