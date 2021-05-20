@@ -1,67 +1,78 @@
-@extends('layouts.app')
+@extends('layout.app')
 
 @section('content')
-<div class="menu-icon-user">
-    <div class="float-left ml-4">
-        <span class="icono-user-span"><i class="fas fa-user"></i>Usuarios</span>
-    </div>
-    <div class="float-right">
-        <img class="img-user" src="https://d1csarkz8obe9u.cloudfront.net/posterpreviews/modern-bakery-logo-design-template-e979c6db88d6772062e4090687c00b7e_screen.jpg?ts=1602149907" alt="logo-user">
-        <i class="fas fa-angle-down"></i>
-    </div>
-</div>
-
-<div class="container register">
-    <form method="POST" action="" class="form-signin">
+@include('includes.navbar', compact('name', 'sub', 'icon'))
+<div class="container register w-50">
+    @include('includes.status')
+    <form method="POST" action="{{ route('user.newr') }}" class="form-signin" enctype="multipart/form-data">
         @csrf
-        <div class="form-label-group">
-            <input id="name" type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name') }}" placeholder="Name" required autocomplete="name">
+        <div class="row">
+            <div class="col form-label-group">
+                <label for="name">{{ __('Name') }}:</label>
+                <input id="name" type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name') }}" autocomplete="name">
+                @error('name')
+                <span class="invalid-feedback" role="alert">
+                    <strong>{{ $message }}</strong>
+                </span>
+                @enderror
+            </div>
+            <div class="col form-label-group">
+                <label for="email">{{ __('Correo Electronico') }}:</label>
+                <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" autocomplete="email">
+                @error('email')
+                <span class="invalid-feedback" role="alert">
+                    <strong>{{ $message }}</strong>
+                </span>
+                @enderror
+            </div>
+        </div>
 
-            @error('name')
+        <div class="row">
+            <div class="col form-label-group">
+                <label for="password">{{ __('Contraseña') }}:</label>
+                <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" value="{{ old('password') }}">
+                @error('password')
+                <span class="invalid-feedback" role="alert">
+                    <strong>{{ $message }}</strong>
+                </span>
+                @enderror
+            </div>
+            <div class="col form-label-group">
+                <label for="rol">Rol:</label>
+                <select class="form-control @error('role_id') is-invalid @enderror" id="role_id" name="role_id" autocomplete="rol">>
+                    @foreach ($roles as $rol)
+                    @if ($rol->name == 'Asociado')
+                    <option value="{{$rol->id}}">{{$rol->display_name}}</option>
+                    @endif
+                    @endforeach
+                </select>
+                @error('role_id')
+                <span class="invalid-feedback" role="alert">
+                    <strong>{{ $message }}</strong>
+                </span>
+                @enderror
+            </div>
+        </div>
+
+        <div class="form-label-group my-3 text-center">
+            <label for="avatar">{{ __('Imagen') }}:</label>
+            <span><i class="fas fa-edit" style="cursor: pointer; color: #2fcece" onclick="handleUploadFile()"></i></span>
+            <div id="insert-image"></div>
+            <input style="display: none;" onchange="handleChange(this)" type="file" id="avatar" name="avatar" class="form-control @error('image') is-invalid @enderror">
+            @error('avatar')
             <span class="invalid-feedback" role="alert">
                 <strong>{{ $message }}</strong>
             </span>
             @enderror
-            <label for="name">{{ __('Name') }}</label>
         </div>
 
-
-        <div class="form-label-group">
-            <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" placeholder="E-Mail Address" required autocomplete="email">
-
-            @error('email')
-            <span class="invalid-feedback" role="alert">
-                <strong>{{ $message }}</strong>
-            </span>
-            @enderror
-            <label for="email">{{ __('E-Mail Address') }}</label>
+        <div class="button-save-user text-center">
+            <button style="    width: 150px;
+    background-color: #2fcece;
+    border: none;" class="btn btn-md btn-save text-white" type="submit">
+                <i class="fas fa-save"></i> Guardar
+            </button>
         </div>
-
-        <div class="form-label-group">
-            <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" value="{{ old('password') }}" placeholder="Password" required>
-
-            @error('password')
-            <span class="invalid-feedback" role="alert">
-                <strong>{{ $message }}</strong>
-            </span>
-            @enderror
-            <label for="password">{{ __('Password') }}</label>
-        </div>
-
-        <div class="form-label-group">
-            <input type="file" id="image" name="image" class="form-control @error('image') is-invalid @enderror" required>
-
-            @error('image')
-            <span class="invalid-feedback" role="alert">
-                <strong>{{ $message }}</strong>
-            </span>
-            @enderror
-            <label for="password">{{ __('Image') }}</label>
-        </div>
-
-        <button class="btn btn-sm color-secondary" type="submit">
-            <i class="far fa-save"></i> Guardar
-        </button>
     </form>
 </div>
 

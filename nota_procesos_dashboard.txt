@@ -1,0 +1,10 @@
+se loguea como franquiciado:
+
+tiene permiso de todo
+
+se loguea como asociado:
+solo puede editar la tienda
+crear borrar y editar productos
+tambien hace la parte de banner
+horarios (estas dos quedan pendientes)
+si es type 1 es franquiciado si es 0 es asociado
