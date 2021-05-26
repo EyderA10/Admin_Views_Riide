@@ -55,7 +55,7 @@
             </div>
         </div>
         <ul class="mt-4">
-            @if (Auth::user()->roles->name === 'Franquiciado')
+            @if (Auth::user()->roles->id === 7 || Auth::user()->roles->id === 2)
             <li class="mt-3">
                 <a href="{{route('all.users')}}">
                     <i class="fa fa-user fa-2x"></i>
@@ -117,7 +117,15 @@
                     </span>
                 </a>
             </li>
-            @elseif (Auth::user()->roles->name === 'Asociado')
+            <li class="mt-3">
+                <a href="{{route('index.cargam')}}">
+                <i class="fa fa-cloud-upload-alt fa-2x"></i>
+                    <span class="nav-text">
+                        Carga masiva
+                    </span>
+                </a>
+            </li>
+            @elseif (Auth::user()->roles->id === 3)
             <li class="mt-3">
                 <a href="{{route('all.tiendas')}}">
                     <i class="fa fa-store fa-2x"></i>
@@ -150,6 +158,14 @@
                     <i class="fa fa-file-import fa-2x"></i>
                     <span class="nav-text">
                         Banners
+                    </span>
+                </a>
+            </li>
+            <li class="mt-3">
+                <a href="{{route('index.cargam')}}">
+                <i class="fa fa-cloud-upload-alt fa-2x"></i>
+                    <span class="nav-text">
+                        Carga masiva
                     </span>
                 </a>
             </li>

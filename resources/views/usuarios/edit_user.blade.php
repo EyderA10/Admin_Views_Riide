@@ -42,6 +42,19 @@
             @enderror
         </div>
 
+        @if (Auth::user()->roles->id === 2)
+        <div class="d-flex justify-content-around my-4">
+            <div class="custom-control custom-radio">
+                <input type="radio" id="customRadio1"  name="state" value="1" class="custom-control-input" @if($user->state === 1) checked @endif>
+                <label class="custom-control-label" for="customRadio1">Activo</label>
+            </div>
+            <div class="custom-control custom-radio">
+                <input type="radio" id="customRadio2" name="state" value="0" class="custom-control-input" @if($user->state === 0) checked @endif>
+                <label class="custom-control-label" for="customRadio2">Inactivo</label>
+            </div>
+        </div>
+        @endif
+
         <div class="form-label-group text-center mx-auto">
             <label for="avatar">{{ __('Imagen') }}:</label>
             <span><i class="fas fa-edit" style="cursor: pointer; color: #2fcece" onclick="handleUploadFile()"></i></span>

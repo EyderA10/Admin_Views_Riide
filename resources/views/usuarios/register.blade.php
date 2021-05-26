@@ -40,11 +40,19 @@
             <div class="col form-label-group">
                 <label for="rol">Rol:</label>
                 <select class="form-control @error('role_id') is-invalid @enderror" id="role_id" name="role_id" autocomplete="rol">>
+                @if (Auth::user()->roles->id === 2)
                     @foreach ($roles as $rol)
-                    @if ($rol->name == 'Asociado')
+                    @if ($rol->id !== 2)
                     <option value="{{$rol->id}}">{{$rol->display_name}}</option>
                     @endif
                     @endforeach
+                @else
+                    @foreach ($roles as $rol)
+                    @if ($rol->id === 3)
+                    <option value="{{$rol->id}}">{{$rol->display_name}}</option>
+                    @endif
+                    @endforeach
+                 @endif
                 </select>
                 @error('role_id')
                 <span class="invalid-feedback" role="alert">

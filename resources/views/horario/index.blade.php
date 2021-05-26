@@ -61,7 +61,6 @@
 </div>
 <script>
     $(document).ready(function() {
-        // horarios = {!! $horarios !!}
         days = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo'];
         console.log("tiendas = ", horarios)
         $('#inputDateTimeStart').clockpicker();

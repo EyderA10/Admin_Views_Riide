@@ -3,6 +3,21 @@
 @section('content')
 @include('includes.navbar', compact('name', 'icon'))
 <div class="container d-flex justify-content-between">
+    @if (Auth::user()->roles->id === 2)
+    <div class="dropdown">
+        <button style="background-color: #2fcece; color: white;" class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Tipo de usuarios
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <a class="dropdown-item" href="{{route('all.users')}}">Todos</a>
+        @foreach ($roles as $rol)
+            @if ($rol->id !== 2)
+                <a class="dropdown-item" href="{{route('all.users', ['id' => $rol->id])}}">{{$rol->display_name}}</a>
+            @endif
+        @endforeach
+        </div>
+    </div>
+    @endif
     <form>
         <div class="form-inline">
             <input class="form-control mr-2" type="search" placeholder="Buscar" aria-label="Search" style="width: 500px;">
@@ -30,57 +45,89 @@
             <div class="swiper-container">
                 <div class="swiper-wrapper">
                     @foreach ($users as $user)
-                    @if ($user->user_id=== Auth::user()->id && $user->roles->id === 3)
-                    <div class="swiper-slide d-flex align-items-end">
-                        <div class="w-100 d-flex">
-                            <div class="w-100 d-flex">
-                                <div class="card" style="width: 18rem;">
-                                    <img src="{{route('my.image', ['image' => $user->avatar])}}" height="250px" class="card-img-top p-2" alt="user-image">
-                                    <div class="card-body">
-                                        <div class="d-flex justify-content-between text-center align-items-center">
-                                            <div>
-                                                <h4 class="card-title">{{$user->name}}</h4>
-                                                <p class="card-text" style="font-size: 14px;">{{$user->roles->name}}</p>
+                        @if (Auth::user()->roles->id === 2)
+                            @if ($user->roles->id !== 2)
+                            <div class="swiper-slide d-flex align-items-end">
+                                <div class="w-100 d-flex">
+                                    <div class="w-100 d-flex">
+                                        <div class="card" style="width: 18rem;">
+                                            @if ($user->avatar === null)
+                                            <img src="users/default.png" height="250px" class="card-img-top p-2" alt="user-image">
+                                            @else
+                                            <img src="{{route('my.image', ['image' => $user->avatar])}}" height="250px" class="card-img-top p-2" alt="user-image">
+                                            @endif
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between text-center align-items-center">
+                                                    <div>
+                                                        <h4 class="card-title">{{$user->name}}</h4>
+                                                        <p class="card-text" style="font-size: 14px;">{{$user->roles->name}}</p>
+                                                    </div>
+                                                    <a href="{{ route('edit.user', ['id' => $user->id]) }}" class="text-decoration-none" style="color: #2fcece"><i class="fas fa-pen"></i>
+                                                        <p>Editar</p>
+                                                    </a>
+                                                    <a href="{{route('delete.user', ['id' => $user->id])}}" class="text-decoration-none" style="color: #2fcece"><i class="fas fa-trash-alt"></i>
+                                                        <p>Borrar</p>
+                                                    </a>
+                                                </div>
                                             </div>
-                                            <a href="{{ route('edit.user', ['id' => $user->id]) }}" class="text-decoration-none" style="color: #2fcece"><i class="fas fa-pen"></i>
-                                                <p>Editar</p>
-                                            </a>
-                                            <a href="{{route('delete.user', ['id' => $user->id])}}" class="text-decoration-none" style="color: #2fcece"><i class="fas fa-trash-alt"></i>
-                                                <p>Borrar</p>
-                                            </a>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    @endif
+                            @endif
+                        @else
+                            @if ($user->user_id=== Auth::user()->id && $user->roles->id === 3)
+                            <div class="swiper-slide d-flex align-items-end">
+                                <div class="w-100 d-flex">
+                                    <div class="w-100 d-flex">
+                                        <div class="card" style="width: 18rem;">
+                                            <img src="{{route('my.image', ['image' => $user->avatar])}}" height="250px" class="card-img-top p-2" alt="user-image">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between text-center align-items-center">
+                                                    <div>
+                                                        <h4 class="card-title">{{$user->name}}</h4>
+                                                        <p class="card-text" style="font-size: 14px;">{{$user->roles->name}}</p>
+                                                    </div>
+                                                    <a href="{{ route('edit.user', ['id' => $user->id]) }}" class="text-decoration-none" style="color: #2fcece"><i class="fas fa-pen"></i>
+                                                        <p>Editar</p>
+                                                    </a>
+                                                    <a href="{{route('delete.user', ['id' => $user->id])}}" class="text-decoration-none" style="color: #2fcece"><i class="fas fa-trash-alt"></i>
+                                                        <p>Borrar</p>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
+                        @endif
                     @endforeach
                 </div>
                 <!-- Add Pagination -->
-                    <!-- <div class="swiper-pagination"></div> -->
-                </div>
+                <!-- <div class="swiper-pagination"></div> -->
             </div>
         </div>
-
-        <!-- Initialize Swiper -->
-        <script>
-            var swiper = new Swiper('.swiper-container', {
-                effect: 'coverflow',
-                grabCursor: true,
-                centeredSlides: true,
-                slidesPerView: 5,
-                coverflowEffect: {
-                    rotate: 50,
-                    stretch: 0,
-                    depth: 100,
-                    modifier: 1,
-                    slideShadows: true,
-                },
-                pagination: {
-                    el: '.swiper-pagination',
-                },
-            });
-        </script>
     </div>
-    @endsection
+
+    <!-- Initialize Swiper -->
+    <script>
+        var swiper = new Swiper('.swiper-container', {
+            effect: 'coverflow',
+            grabCursor: true,
+            centeredSlides: true,
+            slidesPerView: 5,
+            coverflowEffect: {
+                rotate: 50,
+                stretch: 0,
+                depth: 100,
+                modifier: 1,
+                slideShadows: true,
+            },
+            pagination: {
+                el: '.swiper-pagination',
+            },
+        });
+    </script>
+</div>
+@endsection

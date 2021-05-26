@@ -40,14 +40,18 @@
                         <div class="w-100 d-flex">
                             <div class="w-100 d-flex">
                                 <div class="card" style="width: 18rem;">
+                                @if ($producto->imagen === null)
+                                    <img src="img/1619548072-profile.jpg" height="250px" class="card-img-top p-2" alt="user-image">
+                                @else
                                     <img src="{{route('imagen.prod', ['imagen' => $producto->imagen])}}" height="250px" class="card-img-top p-2" alt="user-image">
+                                @endif
                                     <div class="card-body" style="padding: 1.10rem; padding-top: 0;">
                                         <p class="card-title text-center" style="font-size: 25px;">{{$producto->producto}}</p>
                                         <div class="d-flex justify-content-around text-center align-items-center">
                                             <a href="{{route('edit.producto', ['id' => $producto->id])}}" class="text-decoration-none ml-3" style="color: #2fcece;"><i style="font-size: 23px;" class="fas fa-pen"></i>
                                                 <p class="text-secondary" style="font-size: 14px;">Editar</p>
                                             </a>
-                                            @if (Auth::user()->roles->id === 7)
+                                            @if (Auth::user()->roles->id === 7 || Auth::user()->roles->id === 2)
                                             <a href="{{route('delete.prod', ['id' => $producto->id])}}" class="text-decoration-none ml-1" style="color: #2fcece;"><i style="font-size: 23px;" class="fas fa-trash-alt"></i>
                                                 <p class="text-secondary" style="font-size: 14px;">Borrar</p>
                                             </a>

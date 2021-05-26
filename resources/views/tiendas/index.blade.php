@@ -28,7 +28,7 @@
             </div>
         </div>
     </form>
-    @if (Auth::user()->roles->id === 7)
+    @if (Auth::user()->roles->id === 7 || Auth::user()->roles->id === 2)
     <div class="d-flex justify-content-end">
         <a href="{{route('create.tienda')}}" style="    width: 150px;
         background-color: #2fcece;
@@ -54,7 +54,7 @@
                             <div class="w-100 d-flex">
                                 <div class="card" style="width: 18rem;">
                                     @if ($tienda->panel !== null || $tienda->tienda->panel !== null)
-                                        @if (Auth::user()->roles->id === 7)
+                                        @if (Auth::user()->roles->id === 7 || Auth::user()->roles->id === 2)
                                         <img src="{{route('my.panel', ['panel' => $tienda->panel])}}" height="250px" class="card-img-top p-2" alt="user-image">
                                         @else
                                         <img src="{{route('my.panel', ['panel' => $tienda->tienda->panel])}}" height="250px" class="card-img-top p-2" alt="user-image">
@@ -66,7 +66,7 @@
                                         <div class="d-flex justify-content-between text-center align-items-center">
                                             <div class="mr-2">
                                             @if ($tienda->imagen !== null || !empty($tienda->tienda->imagen))
-                                                @if (Auth::user()->roles->id === 7)
+                                                @if (Auth::user()->roles->id === 7 || Auth::user()->roles->id === 2)
                                                     <img style="border-radius: 999px;" width="50px" height="50px" src="{{route('my.imagen.tienda', ['imagen' => $tienda->imagen])}}" alt="">
                                                 @else
                                                     <img style="border-radius: 999px;" width="50px" height="50px" src="{{route('my.imagen.tienda', ['imagen' => $tienda->tienda->imagen])}}" alt="">
@@ -76,7 +76,7 @@
                                             @endif
                                             </div>
                                             <div style="width: 130px;">
-                                            @if (Auth::user()->roles->id === 7)
+                                            @if (Auth::user()->roles->id === 7 || Auth::user()->roles->id === 2)
                                                 <p class="card-title" style="font-size: 20px; margin-bottom: 0;">{{$tienda->tienda}}</p>
                                                 <p class="card-text" style="font-size: 14px;">{{$tienda->sector}}</p>
                                             @else
@@ -84,7 +84,7 @@
                                                 <p class="card-text" style="font-size: 14px;">{{$tienda->tienda->sector}}</p>
                                             @endif
                                             </div>
-                                            @if (Auth::user()->roles->id === 7)
+                                            @if (Auth::user()->roles->id === 7 || Auth::user()->roles->id === 2)
                                             <a href="{{route('tienda.update', ['id' => $tienda->id])}}" class="text-decoration-none ml-3" style="color: #2fcece; font-size: 14px;"><i class="fas fa-pen"></i>
                                                 <span>Editar</span>
                                             </a>
@@ -140,8 +140,8 @@
                     newDivPanel.style.height = '250px';
                     if(e.panel !==  null && e.tienda.panel !== null){
                         newDivPanel.innerHTML = `
-                        <img src="/admin/get-panel/${user.roles.name === 'Asociado' ? e.tienda.panel : e.panel}" alt='file-selected' width="100%" height="100%"/>
-                        <input type="hidden" name="panel_tienda" value="${user.roles.name === 'Asociado' ? e.tienda.panel : e.panel}"/>
+                        <img src="/admin/get-panel/${user.roles.id === 3 ? e.tienda.panel : e.panel}" alt='file-selected' width="100%" height="100%"/>
+                        <input type="hidden" name="panel_tienda" value="${user.roles.id === 3 ? e.tienda.panel : e.panel}"/>
                         `;
                     }else {
                         newDivPanel.innerHTML = `
@@ -158,8 +158,8 @@
                     newDiv.style.height = '93px';
                     if(e.imagen !== null && e.tienda.imagen !== null){
                         newDiv.innerHTML = `
-                            <img src="/admin/get-imagen/${user.roles.name === 'Asociado' ? e.tienda.imagen : e.imagen}" alt='file-selected' width="100%" height="100%"/>
-                            <input type="hidden" name="imagen_tienda" value="${user.roles.name === 'Asociado' ? e.tienda.imagen : e.imagen}"/>
+                            <img src="/admin/get-imagen/${user.roles.id === 3 ? e.tienda.imagen : e.imagen}" alt='file-selected' width="100%" height="100%"/>
+                            <input type="hidden" name="imagen_tienda" value="${user.roles.id === 3 ? e.tienda.imagen : e.imagen}"/>
                         `;
                     }else {
                         newDiv.innerHTML = `
@@ -169,8 +169,8 @@
                     }
                     divP.replaceChild(newDiv, divLast);
                     if(e.tienda || e.tienda.tienda || e.sector || e.tienda.sector){
-                        $("#tienda").val(user.roles.name === 'Asociado' ? e.tienda.tienda : e.tienda);
-                        $("#sector").val(user.roles.name === 'Asociado' ? e.tienda.sector : e.sector);
+                        $("#tienda").val(user.roles.id === 3 ? e.tienda.tienda : e.tienda);
+                        $("#sector").val(user.roles.id === 3 ? e.tienda.sector : e.sector);
                     }else {
                         $("#tienda").val('');
                         $("#sector").val('');

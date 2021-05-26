@@ -20,7 +20,7 @@ class UserController extends Controller
 
     public function getRegisterView()
     {
-        if ($this->isFranquiciado()) {
+        if ($this->isFranquiciado() || \Auth::user()->roles->id === 2) {
             $roles = Rol::all();
             $name = 'Usuarios';
             $sub = 'Crear';
@@ -34,7 +34,7 @@ class UserController extends Controller
     public function registerUsers(Request $request)
     {
 
-        if ($this->isFranquiciado()) {
+        if ($this->isFranquiciado() || \Auth::user()->roles->id === 2) {
 
             $franquiciado_id = \Auth::user();
 
@@ -43,11 +43,15 @@ class UserController extends Controller
                 'email' => 'required|email|regex:/(.+)@(.+)\.(.+)/i|unique:users',
                 'password' => 'required|string',
                 'role_id' => 'required',
-                'avatar' => 'required|image|mimes:png,jpg,jpeg,gif'
+                'avatar' => 'required|image|mimes:png,jpg,jpeg,gif',
+                'state' => 'required'
             ]);
 
             $user = new User();
 
+            if(!empty($request->input('state'))) {
+                $user->state = $request->input('state');
+            }
             $user->name = $request->input('name');
             $user->email = $request->input('email');
             $user->password = Hash::make($request->input('password'));
@@ -70,13 +74,18 @@ class UserController extends Controller
         }
     }
 
-    public function allUsers()
+    public function allUsers($id = null)
     {
-        if ($this->isFranquiciado()) {
-            $users = User::all();
+        if ($this->isFranquiciado() || \Auth::user()->roles->id === 2) {
+            if ($id !== null && \Auth::user()->roles->id === 2) {
+                $users = User::where('role_id', $id)->get();
+            }else {
+                $users = User::all();
+            }
+            $roles = Rol::all();
             $name = 'Usuarios';
             $icon = 'fas fa-user';
-            return view('usuarios.all_users', compact('users', 'name', 'icon'));
+            return view('usuarios.all_users', compact('users', 'name', 'icon', 'roles'));
         } else {
             return redirect()->route('admin-welcm');
         }
@@ -84,7 +93,7 @@ class UserController extends Controller
 
     public function getImage($image)
     {
-        if ($this->isFranquiciado()) {
+        if ($this->isFranquiciado() || \Auth::user()->roles->id === 2) {
             $file = Storage::disk('user')->get($image);
             return new Response($file, 200);
         } else {
@@ -94,7 +103,7 @@ class UserController extends Controller
 
     public function getUserForEdit($id)
     {
-        if ($this->isFranquiciado()) {
+        if ($this->isFranquiciado() || \Auth::user()->roles->id === 2) {
             $user = User::find($id);
             $name = 'Usuarios';
             $sub = 'Editar';
@@ -107,17 +116,21 @@ class UserController extends Controller
 
     public function editUser($id, Request $request)
     {
-        if ($this->isFranquiciado()) {
+        if ($this->isFranquiciado() || \Auth::user()->roles->id === 2) {
             $franquiciado_id = \Auth::user();
 
             $validate = $this->validate($request, [
                 'name' => 'required|alpha',
                 'email' => 'required|email|regex:/(.+)@(.+)\.(.+)/i|unique:users,email,' . $id,
                 'role_id' => 'required',
-                'avatar' => 'image|mimes:png,jpg,jpeg,gif'
+                'avatar' => 'image|mimes:png,jpg,jpeg,gif',
+                'state' => 'required'
             ]);
 
             $user = User::find($id);
+            if (\Auth::user()->roles->id === 2) {
+                $user->state = $request->input('state');
+            }
             $user->name = $request->input('name');
             $user->email = $request->input('email');
             $user->role_id = $request->input('role_id');
@@ -139,7 +152,7 @@ class UserController extends Controller
 
     public function deleteUser($id)
     {
-        if ($this->isFranquiciado()) {
+        if ($this->isFranquiciado() || \Auth::user()->roles->id === 2) {
             $user_deleted = User::where('id', $id)->delete();
 
             if ($user_deleted) {

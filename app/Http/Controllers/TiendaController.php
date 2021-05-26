@@ -24,9 +24,11 @@ class TiendaController extends Controller
     {
         $user = \Auth::user();
         if ($user->roles->id === 7) {
-            $tiendas = Tienda::where('user_id', $user->id)->orderByDesc('id')->get();
+            $tiendas = Tienda::where('user_id', $user->id)->get();
         } elseif ($user->roles->id == 3) {
-            $tiendas = UserStore::where('user_id', $user->id)->orderByDesc('id')->get();
+            $tiendas = UserStore::where('user_id', $user->id)->get();
+        }elseif ($user->roles->id === 2) {
+            $tiendas = Tienda::all();
         }
         $name = 'Tiendas';
         $icon = 'fa fa-store mr-1';
@@ -35,18 +37,18 @@ class TiendaController extends Controller
 
     public function createTienda()
     {
-        if ($this->isFranquiciado()) {
-            $franquiciado = \Auth::user();
+        if ($this->isFranquiciado() || \Auth::user()->roles->id === 2) {
+            $user = \Auth::user();
             $name = 'Tiendas';
             $sub = 'Crear';
             $icon = 'fa fa-store mr-1';
             $categories = Category::all();
-            if ($franquiciado->roles->id === 7) {
-                $tiendas = Tienda::where('user_id', $franquiciado->id)->limit(1)->get();
-            } elseif ($franquiciado->roles->id == 3) {
-                $tiendas = UserStore::where('user_id', $franquiciado->id)->get();
+            if ($user->roles->id === 7) {
+                $tiendas = Tienda::where('user_id', $user->id)->limit(1)->get();
+            } elseif ($user->roles->id == 3) {
+                $tiendas = UserStore::where('user_id', $user->id)->get();
             }
-            $users = User::where('user_id', $franquiciado->id)->get();
+            $users = User::where('user_id', $user->id)->get();
             return view('tiendas.create', compact('name', 'sub', 'icon', 'categories', 'users', 'tiendas'));
         } else {
             return redirect()->route('all.tiendas');
@@ -55,7 +57,7 @@ class TiendaController extends Controller
 
     public function save(Request $request)
     {
-        if ($this->isFranquiciado()) {
+        if ($this->isFranquiciado() || \Auth::user()->roles->id === 2) {
             $user = \Auth::user();
             $panel_path = $request->file('panel');
             $imagen_path = $request->file('imagen');
@@ -382,7 +384,7 @@ class TiendaController extends Controller
 
     public function deleteTienda($id)
     {
-        if ($this->isFranquiciado()) {
+        if ($this->isFranquiciado() || \Auth::user()->roles->id === 2) {
             if (isset($id)) {
                 Tienda::where('id', $id)->delete();
                 CategoriaStore::where('tienda_id', $id)->delete();

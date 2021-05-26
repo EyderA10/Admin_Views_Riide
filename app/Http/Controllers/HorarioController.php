@@ -30,7 +30,7 @@ class HorarioController extends Controller
             }
         }
         // $horarios = Horario::where("tienda_id",$tiendas[0]->id)->get();
-        return view('horario.index', compact('name', 'icon', 'tiendas','horarios'));
+        return view('horario.index', compact('name', 'icon', 'tiendas'));
     }
 
     public function create(Request $request)

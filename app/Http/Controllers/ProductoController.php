@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\ProductoImport;
 use App\Models\Adicional;
 use App\Models\CategoriaProducto;
 use Illuminate\Http\Request;
@@ -14,13 +15,14 @@ use App\Models\ProductQuantity;
 use App\User;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProductoController extends Controller
 {
 
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('auth', ['except' => ['cargaMasiva']]);
     }
 
     public function index()
@@ -33,6 +35,8 @@ class ProductoController extends Controller
         } elseif ($user->roles->id === 3) {
             $getUser = User::find($user->id);
             $productos = Producto::where('user_id', $getUser->user_id)->get();
+        } elseif ($user->roles->id === 2) {
+            $productos = Producto::all();
         }
         return view('productos.index', compact('name', 'icon', 'productos'));
     }
@@ -110,9 +114,9 @@ class ProductoController extends Controller
             }
         }
 
-        if( $request->input("categorias") != null ){
-            CategoriaProducto::where("producto_id",$producto->id)->delete();
-            foreach($request->input("categorias") as $c){
+        if ($request->input("categorias") != null) {
+            CategoriaProducto::where("producto_id", $producto->id)->delete();
+            foreach ($request->input("categorias") as $c) {
                 $categoria_tienda = new CategoriaProducto;
                 $categoria_tienda->producto_id = $producto->id;
                 $categoria_tienda->categoria_id = $c;
@@ -152,7 +156,7 @@ class ProductoController extends Controller
                 'imagen' => $image_name,
                 'user_id' => $user->user_id
             ]);
-        }else {
+        } else {
             return redirect()->route('create.producto');
         }
 
@@ -215,6 +219,30 @@ class ProductoController extends Controller
             return true;
         } elseif (\Auth::user()->roles->id === 3) {
             return false;
+        }
+    }
+
+    public function cargaMasiva(Request $request)
+    {
+        try {
+
+            if(!$request->hasFile('carga_masiva_productos')) {
+                throw new \Exception('File does not exist');
+            }
+
+            $file = $request->file('carga_masiva_productos');
+            Excel::import(new ProductoImport, $file);
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            dd($e);
+            $failures = $e->failures();
+            foreach ($failures as $failure) {
+                $failure->row();
+                $failure->attribute();
+                $failure->errors();
+                $failure->values();
+            }
+        } catch (\Exception $e) {
+            dd($e);
         }
     }
 }

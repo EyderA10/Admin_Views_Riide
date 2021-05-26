@@ -27,7 +27,7 @@ Route::prefix('admin')->group(function () {
     //usuarios
     Route::get('/crear-usuario', 'UserController@getRegisterView')->name('user.register');
     Route::post('/register-user', 'UserController@registerUsers')->name('user.newr');
-    Route::get('/usuarios', 'UserController@allUsers')->name('all.users');
+    Route::get('/usuarios/{id?}', 'UserController@allUsers')->name('all.users');
     Route::get('/get-image/{image}', 'UserController@getImage')->name('my.image');
     Route::get('/edit-user/{id}', 'UserController@getUserForEdit')->name('edit.user');
     Route::post('/edit-asociado/{id}','UserController@editUser')->name('edit.asoc');
@@ -62,4 +62,9 @@ Route::prefix('admin')->group(function () {
 
     //cuenta
     Route::get('/estado-cuenta','CuentaController@index')->name('cuentas');
+
+    //carga masiva
+    Route::get('/carga-masiva', 'CargaMasivaController@index')->name('index.cargam');
+    Route::post('/carga-masiva-productos', 'CargaMasivaController@cargaMasiva')->name('import.file');
+    Route::get('/download-excel', 'CargaMasivaController@export')->name('download.excel');
 });
