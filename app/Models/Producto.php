@@ -10,6 +10,6 @@ class Producto extends Model
     protected $guarded = [];
 
     protected $fillable = [
-        'producto', 'descripcion', 'precio_a', 'precio_b', 'imagen', 'user_id'
+        'producto', 'descripcion', 'precio_a', 'precio_b', 'imagen', 'user_id', 'state'
     ];
 }

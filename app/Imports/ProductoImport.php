@@ -31,9 +31,11 @@ class ProductoImport implements ToModel, WithHeadingRow, WithBatchInserts, WithC
             $precio = explode(",", $row['precio']);
             $user = \Auth::user();
             if ($user->roles->id === 7) {
-                $tiendas = Tienda::where('user_id', $user->id)->get();
+                $tiendas = Tienda::where('user_id', $user->id)->where('state', 1)->get();
             } elseif ($user->roles->id === 3) {
-                $tiendas = UserStore::where('user_id', $user->id)->get();
+                $tiendas = UserStore::where('user_id', $user->id)->whereHas('tienda', function ($q) {
+                    $q->where('state', 1);
+                })->get();
             }
             $producto = Producto::create([
                 'producto' => $row['producto'],
@@ -41,6 +43,7 @@ class ProductoImport implements ToModel, WithHeadingRow, WithBatchInserts, WithC
                 'precio_a' => $row['precio_a'],
                 'precio_b' => $row['precio_b'],
                 'imagen' => $row['imagen'],
+                'state' => 1,
                 'user_id' => $user->id
             ]);
             if (count($tiendas) > 0) {

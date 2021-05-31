@@ -50,6 +50,7 @@
                 @if (count($tiendas) === 0)
                     <p>Nota: Debe agregar tiendas para poder agregar <br> inventario a los productos</p>
                 @endif
+                <div style="height: 200px; overflow: auto;">
                 @foreach ($tiendas as $tienda)
                     <input type="hidden" name="tienda_id[]" value="{{$tienda->id}}">
                     @if (Auth::user()->roles->id === 7)
@@ -117,12 +118,13 @@
                         </div>
                         @endif
                 @endforeach
+                </div>
             </div>
             <div class="form-label-group my-3">
                 <label for="imagen">{{ __('Imagen') }}:</label>
                 <span><i class="fas fa-edit" style="cursor: pointer; color: #2fcece" onclick="handleUploadFile()"></i></span>
                 <div id="insert-image"></div>
-                <input style="display: none;" onchange="handleChange(this)" type="file" id="image" name="imagen" class="form-control @error('imagen') is-invalid @enderror">
+                <input style="display: none;" onchange="handleChange(this)" type="file" id="image" name="imagen[]" multiple class="form-control @error('imagen') is-invalid @enderror">
                 @error('imagen')
                 <span class="invalid-feedback" role="alert">
                     <strong>{{ $message }}</strong>
@@ -170,29 +172,33 @@
     divP.append(newDiv);
 
     function handleChange(e) {
-        // console.log(e.files);
-        let reader = new FileReader();
-        const fileName = e.files[0];
-        reader.readAsDataURL(fileName);
-        reader.onload = function() {
-            const divP = document.querySelector('#insert-image');
-            let divLast = document.querySelector('#div-icon-image');
-            let newDiv = document.createElement('div');
-            newDiv.style.width = '250px';
-            newDiv.style.height = '180px';
-            newDiv.className = 'd-flex';
-            newDiv.innerHTML = `
-            <img src="${reader.result}" alt='file-selected' width="100%" height="100%"/>
-            <i id="delete-file" class="fas fa-times text-danger ml-2" style="font-size: 20px;"></i>
-        `;
-            divP.replaceChild(newDiv, divLast);
-            if (reader.result) {
-                document.getElementById('delete-file').style.cursor = 'pointer';
-                document.getElementById('delete-file').onclick = (e) => {
-                    document.getElementById('image').value = "";
-                    divP.replaceChild(divLast, newDiv);
-                }
+        $('#insert-image').empty();
+        $('#insert-image').css('width', '350px');
+        $('#insert-image').append(`
+            <div id="carouselExampleControls" class="carousel slide w-100 h-100" data-ride="carousel">
+                <div id="insert-imagen-two" class="carousel-inner">
+                </div>
+                <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Previous</span>
+                </a>
+                <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Next</span>
+                </a>
+            </div>
+        `);
+        for (let i = 0; i < e.files.length; i++) {
+            let reader = new FileReader();
+            const file = e.files[i];
+            reader.onload = function() {
+                $("#insert-imagen-two").append(`
+                <div class="carousel-item ${i === 0 ? 'active' : ''}">
+                    <img src="${reader.result}" class="d-block w-100" height="200px" alt="imagen_producto${i}">
+                </div>
+                `);
             }
+            reader.readAsDataURL(file);
         }
     }
 </script>

@@ -28,7 +28,7 @@
             </div>
         </div>
     </form>
-    @if (Auth::user()->roles->id === 7 || Auth::user()->roles->id === 2)
+    @if (Auth::user()->roles->id === 7)
     <div class="d-flex justify-content-end">
         <a href="{{route('create.tienda')}}" style="    width: 150px;
         background-color: #2fcece;
@@ -54,7 +54,7 @@
                             <div class="w-100 d-flex">
                                 <div class="card" style="width: 18rem;">
                                     @if ($tienda->panel !== null || $tienda->tienda->panel !== null)
-                                        @if (Auth::user()->roles->id === 7 || Auth::user()->roles->id === 2)
+                                        @if (Auth::user()->roles->id === 7)
                                         <img src="{{route('my.panel', ['panel' => $tienda->panel])}}" height="250px" class="card-img-top p-2" alt="user-image">
                                         @else
                                         <img src="{{route('my.panel', ['panel' => $tienda->tienda->panel])}}" height="250px" class="card-img-top p-2" alt="user-image">
@@ -66,7 +66,7 @@
                                         <div class="d-flex justify-content-between text-center align-items-center">
                                             <div class="mr-2">
                                             @if ($tienda->imagen !== null || !empty($tienda->tienda->imagen))
-                                                @if (Auth::user()->roles->id === 7 || Auth::user()->roles->id === 2)
+                                                @if (Auth::user()->roles->id === 7)
                                                     <img style="border-radius: 999px;" width="50px" height="50px" src="{{route('my.imagen.tienda', ['imagen' => $tienda->imagen])}}" alt="">
                                                 @else
                                                     <img style="border-radius: 999px;" width="50px" height="50px" src="{{route('my.imagen.tienda', ['imagen' => $tienda->tienda->imagen])}}" alt="">
@@ -76,7 +76,7 @@
                                             @endif
                                             </div>
                                             <div style="width: 130px;">
-                                            @if (Auth::user()->roles->id === 7 || Auth::user()->roles->id === 2)
+                                            @if (Auth::user()->roles->id === 7)
                                                 <p class="card-title" style="font-size: 20px; margin-bottom: 0;">{{$tienda->tienda}}</p>
                                                 <p class="card-text" style="font-size: 14px;">{{$tienda->sector}}</p>
                                             @else
@@ -84,7 +84,7 @@
                                                 <p class="card-text" style="font-size: 14px;">{{$tienda->tienda->sector}}</p>
                                             @endif
                                             </div>
-                                            @if (Auth::user()->roles->id === 7 || Auth::user()->roles->id === 2)
+                                            @if (Auth::user()->roles->id === 7)
                                             <a href="{{route('tienda.update', ['id' => $tienda->id])}}" class="text-decoration-none ml-3" style="color: #2fcece; font-size: 14px;"><i class="fas fa-pen"></i>
                                                 <span>Editar</span>
                                             </a>
@@ -119,7 +119,7 @@
             document.querySelector('#imagen').click();
         }
 
-        const tiendas = {!! $tiendas !!};
+        const tiendas = {!! $tiendas !!}
         const user = {!! Auth::user() !!};
 
         $("#imagen, #panel").on("change", function() {
@@ -132,7 +132,7 @@
 
         if (tiendas.length !== 0) {
             tiendas.forEach((e) => {
-                // console.log(e);
+                console.log(e);
                     let divPanel = document.querySelector('#form-edit-store');
                     let divLastPanel = document.querySelector('#insert-panel');
                     let newDivPanel = document.createElement('div');

@@ -26,7 +26,6 @@
     <!--SCRIPTS-->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
     <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
     <script src="https://unpkg.com/gijgo@1.9.13/js/gijgo.min.js" type="text/javascript"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.13/js/bootstrap-multiselect.js"></script>
@@ -92,6 +91,7 @@
                 </a>
 
             </li>
+            @if (Auth::user()->roles->id === 7)
             <li class="mt-3">
                 <a href="{{route('horarios')}}">
                     <i class="fa fa-clock fa-2x"></i>
@@ -99,7 +99,7 @@
                         Horarios
                     </span>
                 </a>
-
+            @endif
             </li>
             <li class="mt-3">
                 <a href="{{route('all.banners')}}">
@@ -109,6 +109,32 @@
                     </span>
                 </a>
             </li>
+            @if (Auth::user()->roles->id === 2)
+            <li class="mt-3">
+                <a href="">
+                <i class="fa fa-fire-alt fa-2x"></i>
+                    <span class="nav-text">
+                        Destacados
+                    </span>
+                </a>
+            </li>
+            <li class="mt-3">
+                <a href="">
+                <i class="fa fa-dollar-sign fa-2x"></i>
+                    <span class="nav-text">
+                        Cuentas por pagar
+                    </span>
+                </a>
+            </li>
+            <li class="mt-3">
+                <a href="{{route('contactos')}}">
+                <i class="fa fa-address-book fa-2x"></i>
+                    <span class="nav-text">
+                        Contactos
+                    </span>
+                </a>
+            </li>
+            @else
             <li class="mt-3">
                 <a href="{{route('cuentas')}}">
                     <i class="fa fa-dollar-sign fa-2x"></i>
@@ -125,6 +151,7 @@
                     </span>
                 </a>
             </li>
+            @endif
             @elseif (Auth::user()->roles->id === 3)
             <li class="mt-3">
                 <a href="{{route('all.tiendas')}}">

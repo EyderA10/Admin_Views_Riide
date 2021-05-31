@@ -43,13 +43,12 @@ class UserController extends Controller
                 'email' => 'required|email|regex:/(.+)@(.+)\.(.+)/i|unique:users',
                 'password' => 'required|string',
                 'role_id' => 'required',
-                'avatar' => 'required|image|mimes:png,jpg,jpeg,gif',
-                'state' => 'required'
+                'avatar' => 'required|image|mimes:png,jpg,jpeg,gif'
             ]);
 
             $user = new User();
 
-            if(!empty($request->input('state'))) {
+            if (!empty($request->input('state'))) {
                 $user->state = $request->input('state');
             }
             $user->name = $request->input('name');
@@ -57,6 +56,7 @@ class UserController extends Controller
             $user->password = Hash::make($request->input('password'));
             $user->role_id = $request->input('role_id');
             $user->user_id = $franquiciado_id->id;
+            $user->state = 1;
 
             $image_path = $request->file('avatar');
 
@@ -74,13 +74,48 @@ class UserController extends Controller
         }
     }
 
+    public function getUserByState($state = null)
+    {
+        if (\Auth::user()->roles->id === 2) {
+            if ($state !== null) {
+                $users = User::where('state', $state)->paginate(6);;
+                $roles = Rol::all();
+                $name = 'Usuarios';
+                $icon = 'fas fa-user';
+                return view('usuarios.all_users', compact('users', 'name', 'icon', 'roles'));
+            }
+        } else {
+            return redirect()->route('admin-welcm');
+        }
+    }
+    public function getUserBySearch($search = null)
+    {
+        if ($this->isFranquiciado() || \Auth::user()->roles->id === 2) {
+            if ($search !== null) {
+                $users = User::where('name', 'LIKE', "%$search%")
+                    ->where('state', 1)
+                    ->orWhere('email', 'LIKE', "%$search%")
+                    ->paginate(6);
+                $roles = Rol::all();
+                $name = 'Usuarios';
+                $icon = 'fas fa-user';
+                return view('usuarios.all_users', compact('users', 'name', 'icon', 'roles'));
+            }
+        } else {
+            return redirect()->route('admin-welcm');
+        }
+    }
+
     public function allUsers($id = null)
     {
         if ($this->isFranquiciado() || \Auth::user()->roles->id === 2) {
-            if ($id !== null && \Auth::user()->roles->id === 2) {
-                $users = User::where('role_id', $id)->get();
+            if ($id !== null) {
+                $users = User::where('role_id', $id)->paginate(6);
+            }
+            if(\Auth::user()->roles->id === 2) {
+                $users = User::paginate(10);
             }else {
-                $users = User::all();
+                $users = User::where('user_id', \Auth::user()->id)->where('state', 1)->paginate(6);
             }
             $roles = Rol::all();
             $name = 'Usuarios';
@@ -123,8 +158,7 @@ class UserController extends Controller
                 'name' => 'required|alpha',
                 'email' => 'required|email|regex:/(.+)@(.+)\.(.+)/i|unique:users,email,' . $id,
                 'role_id' => 'required',
-                'avatar' => 'image|mimes:png,jpg,jpeg,gif',
-                'state' => 'required'
+                'avatar' => 'image|mimes:png,jpg,jpeg,gif'
             ]);
 
             $user = User::find($id);
@@ -135,6 +169,7 @@ class UserController extends Controller
             $user->email = $request->input('email');
             $user->role_id = $request->input('role_id');
             $user->user_id = $franquiciado_id->id;
+            $user->state = 1;
 
             $image_path = $request->file('avatar');
             if ($image_path) {

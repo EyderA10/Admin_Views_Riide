@@ -28,6 +28,8 @@ Route::prefix('admin')->group(function () {
     Route::get('/crear-usuario', 'UserController@getRegisterView')->name('user.register');
     Route::post('/register-user', 'UserController@registerUsers')->name('user.newr');
     Route::get('/usuarios/{id?}', 'UserController@allUsers')->name('all.users');
+    Route::get('/usuario-found/{search?}', 'UserController@getUserBySearch')->name('search.users');
+    Route::get('/usuario-state/{state?}', 'UserController@getUserByState')->name('state.users');
     Route::get('/get-image/{image}', 'UserController@getImage')->name('my.image');
     Route::get('/edit-user/{id}', 'UserController@getUserForEdit')->name('edit.user');
     Route::post('/edit-asociado/{id}','UserController@editUser')->name('edit.asoc');
@@ -35,6 +37,8 @@ Route::prefix('admin')->group(function () {
     
     //tiendas
     Route::get('/tiendas','TiendaController@index')->name('all.tiendas');
+    Route::get('/tienda-found/{search?}','TiendaController@getTiendaBySearch')->name('search.tiendas');
+    Route::get('/tiendas-estado/{state?}','TiendaController@getTiendaByState')->name('state.tiendas');
     Route::get('/create-tienda','TiendaController@createTienda')->name('create.tienda');
     Route::post('/save-store','TiendaController@save')->name('save.tienda');
     Route::get('/get-panel/{panel}', 'TiendaController@getPanel')->name('my.panel');
@@ -45,7 +49,9 @@ Route::prefix('admin')->group(function () {
     Route::post('/update-tienda/{id}', 'TiendaController@updateTienda')->name('update.store');
 
     //productos
-    Route::get('/productos','ProductoController@index')->name('all.productos');
+    Route::get('/productos/{category?}','ProductoController@index')->name('all.productos');
+    Route::get('/producto-found/{search?}','ProductoController@getProductoBySearch')->name('search.productos');
+    Route::get('/producto-state/{state?}','ProductoController@getProductoByState')->name('state.productos');
     Route::get('/create-producto','ProductoController@create')->name('create.producto');
     Route::get('/edit-producto/{id}', 'ProductoController@edit')->name('edit.producto');
     Route::post('/store-product', 'ProductoController@store')->name('save.producto');
@@ -57,7 +63,7 @@ Route::prefix('admin')->group(function () {
     Route::get('/banners','BannerController@index')->name('all.banners');
 
     //horarios
-    Route::get('/horarios', 'HorarioController@index')->name('horarios');
+    Route::get('/horarios/{tienda_id?}', 'HorarioController@index')->name('horarios');
     Route::post('/create-horarios','HorarioController@create')->name('create.horario');
 
     //cuenta
@@ -67,4 +73,9 @@ Route::prefix('admin')->group(function () {
     Route::get('/carga-masiva', 'CargaMasivaController@index')->name('index.cargam');
     Route::post('/carga-masiva-productos', 'CargaMasivaController@cargaMasiva')->name('import.file');
     Route::get('/download-excel', 'CargaMasivaController@export')->name('download.excel');
+
+    //Riide-Admin
+
+    //contactos
+    Route::get('/contactos', 'ContactoController@index')->name('contactos');
 });

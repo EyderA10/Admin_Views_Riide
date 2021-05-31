@@ -11,11 +11,11 @@ use App\Models\Category;
 use App\Models\Tienda;
 use App\Models\UserStore;
 use App\Models\Producto;
+use App\Models\ProductoImagen;
 use App\Models\ProductQuantity;
 use App\User;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
-use Maatwebsite\Excel\Facades\Excel;
 
 class ProductoController extends Controller
 {
@@ -25,20 +25,89 @@ class ProductoController extends Controller
         $this->middleware('auth', ['except' => ['cargaMasiva']]);
     }
 
-    public function index()
+    public function index($category = null)
     {
         $user = \Auth::user();
         $name = 'Productos';
         $icon = 'fa fa-shopping-cart mr-1';
-        if ($user->roles->id === 7) {
-            $productos = Producto::where('user_id', $user->id)->get();
-        } elseif ($user->roles->id === 3) {
-            $getUser = User::find($user->id);
-            $productos = Producto::where('user_id', $getUser->user_id)->get();
-        } elseif ($user->roles->id === 2) {
-            $productos = Producto::all();
+        $categories = Category::all();
+        $producto_category = false;
+        $productos_imagen = [];
+        if ($category !== null) {
+            $producto_category = true;
+            if($user->roles->id === 2) {
+                //productos con categorias
+                $productos = CategoriaProducto::where('categoria_id', $category)->whereHas('producto', function ($q) {
+                    $q->where('state', 1);
+                })->with('producto')->paginate(6);
+                //productos con imagen
+                $productos_imagen = ProductoImagen::groupBy('producto_id')->get();
+            }else {
+                //productos con categorias
+                $productos = CategoriaProducto::where('categoria_id', $category)->whereHas('producto', function ($q) use ($user) {
+                    $q->where('state', 1)->where('user_id', $user->id);
+                })->with('producto')->paginate(6);
+
+                //productos con imagen
+                $productos_imagen = ProductoImagen::whereHas('producto', function($q) use ($user) {
+                    $q->where('user_id', $user->id)->where('state', 1);
+                })->groupBy('producto_id')->get();
+            }
+        } else {
+            if ($user->roles->id === 7) {
+                // $productos = Producto::where('user_id', $user->id)->where('state', 1)->paginate(6);
+                $productos = ProductoImagen::whereHas('producto', function($q) use ($user) {
+                    $q->where('user_id', $user->id)->where('state', 1);
+                })->with('producto')->groupBy('producto_id')->paginate(6);
+            } elseif ($user->roles->id === 3) {
+                $getUser = User::find($user->id);
+                $productos = ProductoImagen::whereHas('producto', function($q) use ($getUser) {
+                    $q->where('user_id', $getUser->id)->where('state', 1);
+                })->with('producto')->groupBy('producto_id')->paginate(6);
+            } elseif ($user->roles->id === 2) {
+                $productos = ProductoImagen::with('producto')->groupBy('producto_id')->paginate(6);
+            }
         }
-        return view('productos.index', compact('name', 'icon', 'productos'));
+        return view('productos.index', compact('name', 'icon', 'productos', 'categories', 'producto_category', 'productos_imagen'));
+    }
+
+    public function getProductoByState($state = null)
+    {
+        $user = \Auth::user();
+        if ($user->roles->id === 2) {
+            if ($state !== null) {
+                $productos = ProductoImagen::whereHas('producto', function($q) use ($state) {
+                    $q->where('state', $state);
+                })->with('producto')->groupBy('producto_id')->paginate(6);
+                $name = 'Productos';
+                $icon = 'fa fa-shopping-cart mr-1';
+                $categories = Category::all();
+                $producto_category = false;
+                return view('productos.index', compact('name', 'icon', 'productos', 'categories', 'producto_category'));
+            }
+        } else {
+            return redirect()->route('admin-welcm');
+        }
+    }
+
+    public function getProductoBySearch($search = null)
+    {
+        $user = \Auth::user();
+        if ($this->isFranquiciado() || $user->roles->id === 2 || $user->roles->id === 3) {
+            if ($search !== null) {
+
+                $productos = ProductoImagen::whereHas('producto', function($q) use ($search) {
+                    $q->where('producto', 'LIKE', "%$search%")->where('state', 1);
+                })->with('producto')->groupBy('producto_id')->paginate(6);
+                $name = 'Productos';
+                $icon = 'fa fa-shopping-cart mr-1';
+                $categories = Category::all();
+                $producto_category = false;
+                return view('productos.index', compact('name', 'icon', 'productos', 'categories', 'producto_category'));
+            }
+        } else {
+            return redirect()->route('all.productos');
+        }
     }
 
     public function create()
@@ -48,9 +117,11 @@ class ProductoController extends Controller
         $sub = 'Crear';
         $icon = 'fa fa-shopping-cart mr-1';
         if ($user->roles->id === 7) {
-            $tiendas = Tienda::where('user_id', $user->id)->get();
+            $tiendas = Tienda::where('user_id', $user->id)->where('state', 1)->get();
         } elseif ($user->roles->id === 3) {
-            $tiendas = UserStore::where('user_id', $user->id)->get();
+            $tiendas = UserStore::where('user_id', $user->id)->whereHas('tienda', function ($q) {
+                $q->where('state', 1);
+            })->get();
             if (count($tiendas) === 0) {
                 return redirect()->route('all.productos');
             }
@@ -66,76 +137,90 @@ class ProductoController extends Controller
         $sub = 'Editar';
         $icon = 'fa fa-shopping-cart mr-1';
         $categories = Category::all();
-        $producto = Producto::find($id);
+        $producto = ProductoImagen::whereHas('producto', function ($q) use($id) {
+            $q->where('id', $id)->where('state', 1);
+        })->with('producto')->get();
         $adicionales = Adicional::where('producto_id', $id)->get();
         $product_quantity = ProductQuantity::where('producto_id', $id)->get();
+        $riide = false;
         if ($user->roles->id === 7) {
-            $tiendas = Tienda::where('user_id', $user->id)->get();
+            $tiendas = Tienda::where('user_id', $user->id)->where('state', 1)->get();
         } elseif ($user->roles->id === 3) {
-            $tiendas = UserStore::where('user_id', $user->id)->get();
+            $tiendas = UserStore::where('user_id', $user->id)->whereHas('tienda', function ($q) {
+                $q->where('state', 1);
+            })->get();
             if (count($tiendas) === 0) {
                 return redirect()->route('all.productos');
             }
+        } elseif ($user->roles->id === 2) {
+            $riide = true;
+            $tiendas = Tienda::all();
         }
-        return view('productos.edit', compact('name', 'sub', 'icon', 'categories', 'producto', 'tiendas', 'adicionales', 'product_quantity'));
+        return view('productos.edit', compact('name', 'sub', 'icon', 'categories', 'producto', 'tiendas', 'adicionales', 'product_quantity', 'riide'));
     }
 
     public function editProducto($id, Request $request)
     {
         //dd($request->input("adicionales"));
         // dd($request->all());
-        $producto = Producto::find($id);
+        $producto = Producto::where('id', $id)->where('state', 1)->first();
         $imagen = $request->file('imagen');
+        $user = \Auth::user();
+        if ($user->roles->id === 2) {
+            $producto->state = $request->input('state');
+            $producto->update();
+            return redirect()->route('all.productos');
+        } else {
+            if ($imagen) {
+                $image_name = time() . $imagen->getClientOriginalName();
+                Storage::disk('productos')->put($image_name, File::get($imagen));
+                $producto->imagen = $image_name;
+            }
+            $producto->producto = $request->input('producto');
+            $producto->descripcion = $request->input('descripcion');
+            $producto->precio_a = $request->input('precio_a');
+            $producto->precio_b = $request->input('precio_b');
+            $producto->update();
 
-        if ($imagen) {
-            $image_name = time() . $imagen->getClientOriginalName();
-            Storage::disk('productos')->put($image_name, File::get($imagen));
-            $producto->imagen = $image_name;
-        }
-        $producto->producto = $request->input('producto');
-        $producto->descripcion = $request->input('descripcion');
-        $producto->precio_a = $request->input('precio_a');
-        $producto->precio_b = $request->input('precio_b');
-        $producto->update();
+            if (count(json_decode($request->input("adicionales"))) > 0) {
 
-        if (count(json_decode($request->input("adicionales"))) > 0) {
+                Adicional::where('producto_id', $id)->delete();
 
-            Adicional::where('producto_id', $id)->delete();
-
-            $adicionales = json_decode($request->input("adicionales"));
-            foreach ($adicionales as $key) {
-                if ($key->adicional !== "" && $key->precio !== "") {
-                    $adicional = new Adicional;
-                    $adicional->adicional = $key->adicional;
-                    $adicional->precio = $key->precio;
-                    $adicional->producto_id = $producto->id;
-                    $adicional->save();
+                $adicionales = json_decode($request->input("adicionales"));
+                foreach ($adicionales as $key) {
+                    if ($key->adicional !== "" && $key->precio !== "") {
+                        $adicional = new Adicional;
+                        $adicional->adicional = $key->adicional;
+                        $adicional->precio = $key->precio;
+                        $adicional->producto_id = $producto->id;
+                        $adicional->save();
+                    }
                 }
             }
-        }
 
-        if ($request->input("categorias") != null) {
-            CategoriaProducto::where("producto_id", $producto->id)->delete();
-            foreach ($request->input("categorias") as $c) {
-                $categoria_tienda = new CategoriaProducto;
-                $categoria_tienda->producto_id = $producto->id;
-                $categoria_tienda->categoria_id = $c;
-                $categoria_tienda->save();
+            if ($request->input("categorias") != null) {
+                CategoriaProducto::where("producto_id", $producto->id)->delete();
+                foreach ($request->input("categorias") as $c) {
+                    $categoria_tienda = new CategoriaProducto;
+                    $categoria_tienda->producto_id = $producto->id;
+                    $categoria_tienda->categoria_id = $c;
+                    $categoria_tienda->save();
+                }
             }
-        }
 
-        if ($request->input('tienda_id') !== null && $request->input('cantidad') !== null && $request->input('inventariable') !== null) {
-            ProductQuantity::where('producto_id', $producto->id)->delete();
-            foreach ($request->input('tienda_id') as $key => $tienda) {
-                $product_quantity = new ProductQuantity();
-                $product_quantity->producto_id = $producto->id;
-                $product_quantity->tienda_id = $tienda;
-                $product_quantity->cantidad = $request->input('cantidad')[$key];
-                $product_quantity->inventariable = $request->input('inventariable')[$key];
-                $product_quantity->save();
+            if ($request->input('tienda_id') !== null && $request->input('cantidad') !== null && $request->input('inventariable') !== null) {
+                ProductQuantity::where('producto_id', $producto->id)->delete();
+                foreach ($request->input('tienda_id') as $key => $tienda) {
+                    $product_quantity = new ProductQuantity();
+                    $product_quantity->producto_id = $producto->id;
+                    $product_quantity->tienda_id = $tienda;
+                    $product_quantity->cantidad = $request->input('cantidad')[$key];
+                    $product_quantity->inventariable = $request->input('inventariable')[$key];
+                    $product_quantity->save();
+                }
             }
+            return redirect()->route('all.productos');
         }
-        return redirect()->route('all.productos');
     }
 
     public function store(Request $request)
@@ -144,18 +229,25 @@ class ProductoController extends Controller
         $user_auth = \Auth::user();
         $user = User::find($user_auth->id);
 
-        if ($image_path) {
-            $image_name = time() . $image_path->getClientOriginalName();
-            Storage::disk('productos')->put($image_name, File::get($image_path));
-
-            $producto = Producto::create([
-                'producto' => $request->input('producto'),
-                'descripcion' => $request->input('descripcion'),
-                'precio_a' => $request->input('precio_a'),
-                'precio_b' => $request->input('precio_b'),
-                'imagen' => $image_name,
-                'user_id' => $user->user_id
+        $producto = Producto::create([
+            'producto' => $request->input('producto'),
+            'descripcion' => $request->input('descripcion'),
+            'precio_a' => $request->input('precio_a'),
+            'precio_b' => $request->input('precio_b'),
+            'state' => 1,
+            'user_id' => $user->user_id
             ]);
+
+        if ($image_path) {
+            foreach ($image_path as $key =>  $imagen) {
+                $file_name = $imagen->getClientOriginalName();
+                Storage::disk('productos')->put($file_name, File::get($imagen));
+                ProductoImagen::create([
+                    'producto_id' => $producto->id,
+                    'imagen' => $file_name,
+                    'orden' => $key
+                ]);
+            }
         } else {
             return redirect()->route('create.producto');
         }
@@ -206,7 +298,7 @@ class ProductoController extends Controller
     {
         if ($this->isFranquiciado()) {
 
-            Producto::where('id', $id)->delete();
+            Producto::where('id', $id)->where('state', 1)->delete();
             return redirect()->route('all.productos');
         } else {
             return redirect()->route('all.productos');
@@ -222,27 +314,4 @@ class ProductoController extends Controller
         }
     }
 
-    public function cargaMasiva(Request $request)
-    {
-        try {
-
-            if(!$request->hasFile('carga_masiva_productos')) {
-                throw new \Exception('File does not exist');
-            }
-
-            $file = $request->file('carga_masiva_productos');
-            Excel::import(new ProductoImport, $file);
-        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
-            dd($e);
-            $failures = $e->failures();
-            foreach ($failures as $failure) {
-                $failure->row();
-                $failure->attribute();
-                $failure->errors();
-                $failure->values();
-            }
-        } catch (\Exception $e) {
-            dd($e);
-        }
-    }
 }

@@ -9,8 +9,8 @@
         <div class="d-flex justify-content-between">
             <p style="font-size: 22px; color: #2fcece">Tu marca:</p>
             <i style="color: #2fcece; position: absolute; top: 20%; right: 10%;" onclick="handleUploadFilePanel()" id="hidePenPanel" class="fas fa-pen"></i>
-            <input type="file" onchange="handleChangePanel(this)" id="panel" name="panel" style="display: none;" />
-            <input type="file" onchange="handleChangeImagen(this)" id="imagen" name="imagen" style="display: none;" />
+            <input type="file" @if($riide) disabled @endif onchange="handleChangePanel(this)" id="panel" name="panel" style="display: none;" />
+            <input type="file" @if($riide) disabled @endif onchange="handleChangeImagen(this)" id="imagen" name="imagen" style="display: none;" />
         </div>
             @if ($tienda->panel !== null)
             <div id="insert-panel" style="width: 100%; height: 250px;">
@@ -34,9 +34,9 @@
                 @endif
                 <div class="ml-2">
                     <i style="color: #2fcece; position: absolute; top: 70%; left: 41%;" id="penTienda" class="fas fa-pen"></i>
-                    <input style="width: 22rem;" type="text" class="form-control" name="tienda" value="{{$tienda->tienda}}" placeholder="Nombre de la Marca:">
+                    <input style="width: 22rem;" @if($riide) disabled @endif type="text" class="form-control" name="tienda" value="{{$tienda->tienda}}" placeholder="Nombre de la Marca:">
                     <i style="color: #2fcece; position: absolute; top: 62%; left: 41%;" id="penSector" class="fas fa-pen"></i>
-                    <input style="width: 22rem;" type="text" class="form-control mt-2" name="sector" value="{{$tienda->sector}}" placeholder="Sector:">
+                    <input style="width: 22rem;" @if($riide) disabled @endif type="text" class="form-control mt-2" name="sector" value="{{$tienda->sector}}" placeholder="Sector:">
                 </div>
         </div>
         <div class="d-flex justify-content-between mt-2 mb-5" style="height: 70px;">
@@ -53,7 +53,7 @@
                         </div>
                         <div class="d-flex flex-column ml-2">
                             <div class="w-100 h-100 d-flex text-white">
-                                <input type="number" name="tiempo" value="{{$tienda->tiempo}}" placeholder="00" class="border-0 bg-transparent h-100" style="outline: 0px ;font-size: 36px ;width: 53px;">
+                                <input type="number" @if($riide) disabled @endif name="tiempo" value="{{$tienda->tiempo}}" placeholder="00" class="border-0 bg-transparent h-100" style="outline: 0px ;font-size: 36px ;width: 53px;">
                                 <div class="w-100 h-100 text-white d-flex align-items-center" style="font-size: 18px ;">
                                     min
                                 </div>
@@ -70,14 +70,25 @@
         <div id="map-cpm" class="w-75 mx-auto" style="height: 400px ;">
             <div id="map" style="height: 100%;"></div>
         </div>
-        <select name="user_id[]" id="multiple-checkboxes" multiple="multiple">
+        <select name="user_id[]" @if($riide) disabled @endif id="multiple-checkboxes" multiple="multiple">
             @foreach ($users as $user)
                 @if ($user->roles->name === 'Asociado')
                     <option value="{{$user->id}}">{{$user->name}}</option>
                 @endif
             @endforeach
         </select>
-    
+        @if (Auth::user()->roles->id === 2)
+        <div class="d-flex justify-content-center my-4">
+            <div class="custom-control custom-radio">
+                <input type="radio" id="customRadio1"  name="state" value="1" class="custom-control-input" @if($tienda->state === 1) checked @endif>
+                <label class="custom-control-label" for="customRadio1">Activo</label>
+            </div>
+            <div class="custom-control custom-radio ml-4">
+                <input type="radio" id="customRadio2" name="state" value="0" class="custom-control-input" @if($tienda->state === 0) checked @endif>
+                <label class="custom-control-label" for="customRadio2">Inactivo</label>
+            </div>
+        </div>
+        @endif
         <div class="pt-4 pb-5 text-center">
             <button type="submit" style="width: 180px; background-color: #2fcece; color: white; font-size: 18px;" class="btn btn-md"> <i class="fas fa-save mr-2"></i>Guardar</button>
         </div>
@@ -197,7 +208,7 @@
                         <ul class="list-group">
                         <li class="list-group-item border-0 m-0 p-0 pl-3" data-parent="null" style="background-color: transparent;">
                             <div style="position:unset" class="custom-control form-control-lg custom-checkbox" style="line-height: 1.2;">  
-                                <input name="categoria_id[]" value="${categorias[$i].id}" onChange="checkCategoria(this)" type="checkbox" class="custom-control-input" data-id="${categorias[$i].id}" id="categoria${categorias[$i].id}">  
+                                <input @if($riide) disabled @endif name="categoria_id[]" value="${categorias[$i].id}" onChange="checkCategoria(this)" type="checkbox" class="custom-control-input" data-id="${categorias[$i].id}" id="categoria${categorias[$i].id}">  
                                 <label style="color: #2fcece;" id="label-${categorias[$i].id}" class="custom-control-label" for="categoria${categorias[$i].id}">${categorias[$i].categoria}</label>  
                             </div>
                             <ul class="list-group m-0 p-0" id="lista-categoria${categorias[$i].id}"></ul>
@@ -227,7 +238,7 @@
                         $(`#lista-categoria${categorias[$i].categoria_id}`).append(`
                             <li class="list-group-item border-0 m-0 p-0 pl-3" data-parent="null" style="background-color: transparent;">
                             <div style="position:unset" class="custom-control form-control-lg custom-checkbox my-0 py-0" style="line-height: 1.2;">  
-                                <input name="categoria_id[]" value="${categorias[$i].id}" onChange="checkCategoria(this)" type="checkbox" class="custom-control-input" data-id="${categorias[$i].id}" id="categoria${categorias[$i].id}">  
+                                <input @if($riide) disabled @endif name="categoria_id[]" value="${categorias[$i].id}" onChange="checkCategoria(this)" type="checkbox" class="custom-control-input" data-id="${categorias[$i].id}" id="categoria${categorias[$i].id}">  
                                 <label class="custom-control-label" id="label-${categorias[$i].id}" for="categoria${categorias[$i].id}">${categorias[$i].categoria}</label>  
                             </div>
                             <ul class="list-group m-0 p-0" id="lista-categoria${categorias[$i].id}"></ul>

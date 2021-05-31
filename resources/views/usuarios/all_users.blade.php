@@ -17,10 +17,20 @@
         @endforeach
         </div>
     </div>
+    <div class="dropdown">
+        <button style="background-color: #2fcece; color: white;" class="btn dropdown-toggle" type="button" id="2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Estado
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
+            <a class="dropdown-item" href="{{route('all.users')}}">Todos</a>
+            <a class="dropdown-item" href="{{route('state.users', ['state' => 1])}}">Activo</a>
+            <a class="dropdown-item" href="{{route('state.users', ['state' => 0])}}">Inactivo</a>
+        </div>
+    </div>
     @endif
-    <form>
+    <form id="buscador" action="{{route('search.users')}}" method="GET">
         <div class="form-inline">
-            <input class="form-control mr-2" type="search" placeholder="Buscar" aria-label="Search" style="width: 500px;">
+            <input class="form-control mr-2" name="search" id="search" type="search" placeholder="Buscar" aria-label="Search" style="width: 500px;">
             <button class="btn btn-secondary" type="submit"><i class="fas fa-search text-white"></i></button>
         </div>
     </form>
@@ -62,11 +72,8 @@
                                                         <h4 class="card-title">{{$user->name}}</h4>
                                                         <p class="card-text" style="font-size: 14px;">{{$user->roles->name}}</p>
                                                     </div>
-                                                    <a href="{{ route('edit.user', ['id' => $user->id]) }}" class="text-decoration-none" style="color: #2fcece"><i class="fas fa-pen"></i>
-                                                        <p>Editar</p>
-                                                    </a>
-                                                    <a href="{{route('delete.user', ['id' => $user->id])}}" class="text-decoration-none" style="color: #2fcece"><i class="fas fa-trash-alt"></i>
-                                                        <p>Borrar</p>
+                                                    <a href="{{ route('edit.user', ['id' => $user->id]) }}" class="text-decoration-none" style="color: #2fcece"><i class="far fa-eye"></i>
+                                                        <p>Ver</p>
                                                     </a>
                                                 </div>
                                             </div>
@@ -104,12 +111,22 @@
                         @endif
                     @endforeach
                 </div>
+                <div class="d-flex justify-content-center mt-4">{{$users->links('pagination::bootstrap-4')}}</div>
                 <!-- Add Pagination -->
                 <!-- <div class="swiper-pagination"></div> -->
             </div>
         </div>
     </div>
-
+    <script>
+        $(document).ready(function () {
+            $("#buscador").submit(function(e) {
+                // e.preventDefault();
+                let url = "http://localhost:8000/admin";
+                const valor = $("#buscador #search").val();
+                $(this).attr("action", `${url}/usuario-found/${valor}`);
+            });
+        });
+    </script>
     <!-- Initialize Swiper -->
     <script>
         var swiper = new Swiper('.swiper-container', {

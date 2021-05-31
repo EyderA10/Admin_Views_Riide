@@ -6,12 +6,13 @@
 <div class="container w-50 mb-5">
     <form id="form" action="{{route('create.horario')}}" method="POST">
         @csrf
-        <input type="hidden" id="apertura" name="apertura" value="" />
-        <input type="hidden" id="cierre" name="cierre" value="" />
+        <input @if($riide) disabled @endif type="hidden" id="apertura" name="apertura" value="" />
+        <input @if($riide) disabled @endif type="hidden" id="cierre" name="cierre" value="" />
+        @if (!$riide && count($tiendas) < 0)
         <div class="col form-label-group mx-auto w-25">
             <select class="form-control" id="tienda_id" name="tienda_id">
                 @foreach ($tiendas as $tienda)
-                @if (Auth::user()->roles->id === 7)
+                @if (Auth::user()->roles->id === 7 || Auth::user()->roles->id === 2)
                 <option value="{{$tienda->id}}">{{$tienda->tienda}}</option>
                 @else
                 <option value="{{$tienda->tienda->id}}">{{$tienda->tienda->tienda}}</option>
@@ -19,11 +20,12 @@
                 @endforeach
             </select>
         </div>
+        @endif
         <div class="d-flex justify-content-between text-center">
             <div>
                 <p style="color: #2fcece; font-size: 22px;" class="font-weight-bold">Apertura</p>
                 <div class="input-group" id="inputDateTimeStart" data-placement="bottom" data-autoclose="true">
-                    <input id="time-start" type="text" class="form-control d-none">
+                    <input @if($riide) disabled @endif id="time-start" type="text" class="form-control d-none">
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-time"></span>
                     </span>
@@ -32,14 +34,14 @@
                 <div id="inicio">
                 </div>
                 <!---Inicio--->
-                <button type="button" onclick="handleClickPickerStart()" style="border-radius: 100px; background-color: #2fcece; color: white;" class="mt-3 btn btn-md"><i class="fas fa-plus"></i>
+                <button @if($riide) disabled @endif type="button" onclick="handleClickPickerStart()" style="border-radius: 100px; background-color: #2fcece; color: white;" class="mt-3 btn btn-md"><i class="fas fa-plus"></i>
                 </button>
             </div>
             <div>
                 <div>
                     <p style="color: #2fcece; font-size: 22px;" class="font-weight-bold">Cierre</p>
                     <div class="input-group" id="inputDateTimeEnd" data-placement="bottom" data-autoclose="true">
-                        <input id="time-end" type="text" class="form-control d-none">
+                        <input @if($riide) disabled @endif  id="time-end" type="text" class="form-control d-none">
                         <span class="input-group-addon">
                             <span class="glyphicon glyphicon-time"></span>
                         </span>
@@ -48,12 +50,12 @@
                     <div id="fin">
                     </div>
                     <!---Fin--->
-                    <button type="button" onclick="handleClickPickerEnd()" style="border-radius: 100px; background-color: #2fcece; color: white;" class="mt-3 btn btn-md"><i class="fas fa-plus"></i></button>
+                    <button @if($riide) disabled @endif  type="button" onclick="handleClickPickerEnd()" style="border-radius: 100px; background-color: #2fcece; color: white;" class="mt-3 btn btn-md"><i class="fas fa-plus"></i></button>
                 </div>
             </div>
         </div>
         <div class="text-center d-flex flex-wrap justify-content-center align-content-end" style="min-height: 250px;">
-            <button style="width: 150px; background-color: #2fcece; border: none;" class="btn btn-md btn-save text-white mb-2" type="submit">
+            <button @if($riide) disabled @endif  style="width: 150px; background-color: #2fcece; border: none;" class="btn btn-md btn-save text-white mb-2" type="submit">
                 <i class="fas fa-save"></i> Guardar
             </button>
         </div>
@@ -62,7 +64,11 @@
 <script>
     $(document).ready(function() {
         days = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo'];
-        console.log("tiendas = ", horarios)
+        dias_inicio = {!! $dias !!};
+        dias_fin = {!! $dias !!};
+        aperturas = {!! $aperturas !!};
+        cierres = {!! $cierres !!};
+        estados = {!! $estados !!};
         $('#inputDateTimeStart').clockpicker();
         $('#inputDateTimeEnd').clockpicker();
         $('#multiple-checkboxes').multiselect({
@@ -70,19 +76,111 @@
             includeSelectAllOption: true,
             nonSelectedText: 'Selecciona un dia'
         });
+        if(dias_inicio.length > 0 && dias_fin.length > 0){
+            if (aperturas.length > 0 && estados.length > 0) {
+                aperturas.forEach((apertura, i) => {
+                    cont_add = window.crypto.getRandomValues(new Uint32Array(1))[0];
+                    cont_add = cont_add.toString(16);
+                    if(apertura.inicio !== null && estados[i].state !== null){
+                        $('#inicio').append(`<div id="div-inicio" class="d-flex justify-content-around my-3" style="border-bottom: 1px solid #2fcece">
+                        <div>
+                        <input type="time" @if($riide) disabled @endif data-type="inicio" data-id="${cont_add}" id="inicio-${cont_add}" name="inicio-${cont_add}" class="col-6 mx-auto form-control" value="${apertura.inicio}">
+                        <select onchange="handleChangeSelectStart(event)" @if($riide) disabled @endif name="dia_inicio-${cont_add}" data-id="${cont_add}" id="dia-${cont_add}" multiple="multiple">
+                        </select>
+                        </div>
+                        <div>
+                        <div class="dropdown"><input @if($riide) disabled @endif data-id="${cont_add}" value="${estados[i].state}" onchange="checkStatusInicio(event)" type="checkbox" name="status_inicio-${cont_add}" data-toggle="toggle" id="status-${cont_add}"></div>
+                        </div>
+                        </div>`);
+                    }
+                    if( $(`#status-${cont_add}`).val() === 0) {
+                        $(`#status-${cont_add}`).prop("checked", false)
+                    }else {
+                        $(`#status-${cont_add}`).prop("checked", true);
+                    }
+                    dias_inicio.forEach((day, i) => {
+                        $(`#dia-${cont_add}`).append(`
+                            <option value="${day.dia}" selected>${days[i]}</option>
+                        `);
+                    });
+                    $(`#status-${cont_add}`).bootstrapToggle({
+                        on: 'On',
+                        off: 'Off'
+                    });
+        
+                    $(`#dia-${cont_add}`).multiselect({
+                        buttonWidth: '200px',
+                        includeSelectAllOption: true,
+                        nonSelectedText: 'Selecciona un dia'
+                    });
+                });
+            }
+        if (cierres.length > 0 && estados.length > 0) {
+            cierres.forEach((cierre, i) => {
+                cont_add = window.crypto.getRandomValues(new Uint32Array(1))[0];
+                cont_add = cont_add.toString(16);
+                if(cierre.fin !== null && estados[i].state !== null){
+                $('#fin').append(`<div id="cont-add-${cont_add}" class="d-flex justify-content-around my-3" style="border-bottom: 1px solid #2fcece">
+                            <div>
+                                <input @if($riide) disabled @endif type="time" data-type="fin" data-id="${cont_add}" id="fin-${cont_add}" class="col-6 mx-auto form-control" name="fin-${cont_add}" value="${cierre.fin}">
+                                <select @if($riide) disabled @endif name="dia_fin-${cont_add}" data-id="${cont_add}" id="dia-${cont_add}" multiple="multiple">
+                                </select>
+                            </div>
+                            <div>
+                                <div class="dropdown"><input @if($riide) disabled @endif data-id="${cont_add}" name="status_fin-${cont_add}" onchange="checkStatusFin(event)" value="${estados[i].state}" type="checkbox" data-toggle="toggle" id="status-${cont_add}"></div>
+                            </div>
+                        </div>`);
+                }
+                    if( $(`#status-${cont_add}`).val() === 0) {
+                        $(`#status-${cont_add}`).prop("checked", false)
+                    }else {
+                        $(`#status-${cont_add}`).prop("checked", true);
+                    }
+                    dias_fin.forEach((day, i) => {
+                        $(`#dia-${cont_add}`).append(`
+                            <option value="${day.dia}" selected>${days[i]}</option>
+                        `);
+                    });
+                    $(`#status-${cont_add}`).bootstrapToggle({
+                        on: 'On',
+                        off: 'Off'
+                    });
+                    $(`#dia-${cont_add}`).multiselect({
+                        buttonWidth: '200px',
+                        includeSelectAllOption: true,
+                        nonSelectedText: 'Selecciona un dia'
+                    });
+                });
+            }
+        }else {
+            alert('esta tienda no posee aun horarios');
+            window.location.href = "http://localhost:8000/admin/tiendas";
+        }
     });
 
+    function handleChangeSelectStart(e) {
+        dias_inicio = $(`#dia-${e.target.dataset.id}`).val();
+        console.log(dias_inicio);
+    }
 
     function handleClickPickerStart() {
-        $(document).ready(function() {
-            $('#time-start').click();
-        });
+        if(dias_inicio.length === 7){
+            alert('Ya se han asignado todos los dias a un horario de apertura!');
+        }else {
+            $(document).ready(function() {
+                $('#time-start').click();
+            });
+        }
     }
 
     function handleClickPickerEnd() {
-        $(document).ready(function() {
-            $('#time-end').click();
-        })
+        if(dias_fin.length === 7) {
+            alert('Ya se han asignado todos los dias a un horario de cierre!')
+        }else {
+            $(document).ready(function() {
+                $('#time-end').click();
+            });
+        }
     }
 
     function handleChangePickerStart(e) {
@@ -90,26 +188,21 @@
         cont_add = window.crypto.getRandomValues(new Uint32Array(1))[0];
         cont_add = cont_add.toString(16);
         $('#inicio').append(`<div id="div-inicio" class="d-flex justify-content-around my-3" style="border-bottom: 1px solid #2fcece">
-                        <div>
-                            <input type="time" data-type="inicio" data-id="${cont_add}" id="inicio-${cont_add}" name="inicio-${cont_add}" class="col-6 mx-auto form-control" value="${time}">
-                            <select name="dia_inicio-${cont_add}" data-id="${cont_add}" id="dia-${cont_add}" multiple="multiple">
-                            </select>
-                        </div>
-                        <div>
-                            <div class="dropdown"><input data-id="${cont_add}" value="0" onchange="checkStatusInicio(event)" type="checkbox" name="status_inicio-${cont_add}" data-toggle="toggle" id="status-${cont_add}"></div>
-                        </div>
-                    </div>`);
-        days.forEach((day, i) => {
-            i++
-            $(`#dia-${cont_add}`).append(`
-                <option value="${i}">${day}</option>
-            `);
-        });
-        $(document).ready(function() {
-            $(`#status-${cont_add}`).bootstrapToggle({
-                on: 'On',
-                off: 'Off'
-            });
+                <div>
+                <input type="time" data-type="inicio" data-id="${cont_add}" id="inicio-${cont_add}" name="inicio-${cont_add}" class="col-6 mx-auto form-control" value="${time}">
+                <select onchange="handleChangeSelectStart(event)" name="dia_inicio-${cont_add}" data-id="${cont_add}" id="dia-${cont_add}" multiple="multiple">
+                </select>
+                </div>
+                <div>
+                <div class="dropdown"><input data-id="${cont_add}" value="0" onchange="checkStatusInicio(event)" type="checkbox" name="status_inicio-${cont_add}" data-toggle="toggle" id="status-${cont_add}"></div>
+                </div>
+            </div>`);
+            $(`#status-${cont_add}`).attr("disabled", false);
+            $(document).ready(function() {
+                $(`#status-${cont_add}`).bootstrapToggle({
+                    on: 'On',
+                    off: 'Off'
+                });
 
             $(`#dia-${cont_add}`).multiselect({
                 buttonWidth: '200px',
@@ -162,7 +255,6 @@
     }
 
     function checkStatusFin(e) {
-        let dias = $(`#dia-${e.target.dataset.id}`).val();
         if (e.checked || $(`#status-${e.target.dataset.id}`).val() === "1") {
             $(`#status-${e.target.dataset.id}`).val("0");
         } else {
