@@ -55,7 +55,7 @@ class ProductoController extends Controller
                     $q->where('user_id', $user->id)->where('state', 1);
                 })->groupBy('producto_id')->get();
                 if(count($productos_imagen) === 0) {
-                    dd($productos_imagen );
+                    dd($productos_imagen);
                 }
             }
         } else {
