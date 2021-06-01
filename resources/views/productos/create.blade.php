@@ -175,6 +175,9 @@
         $('#insert-image').empty();
         $('#insert-image').css('width', '350px');
         $('#insert-image').append(`
+        <div class="w-100" style="text-align: right;">
+            <i id="delete-carrousel" class="fas fa-times text-danger" style="font-size: 20px;"></i>
+        </div>
             <div id="carouselExampleControls" class="carousel slide w-100 h-100" data-ride="carousel">
                 <div id="insert-imagen-two" class="carousel-inner">
                 </div>
@@ -200,7 +203,28 @@
             }
             reader.readAsDataURL(file);
         }
+        if($("#delete-carrousel")) {
+            $("#delete-carrousel").on('click', function () {
+                $('#insert-image').empty();
+                const divP = document.querySelector('#insert-image');
+                let newDiv = document.createElement('div');
+                newDiv.style.width = '250px';
+                newDiv.style.height = '180px';
+                newDiv.style.backgroundColor = 'white';
+                newDiv.className = 'd-flex align-items-center';
+                newDiv.id = 'div-icon-image';
+                newDiv.innerHTML = `
+                <div style="width: 30%;  margin: 0 auto">
+                    <i class="far fa-image" style="font-size: 60px; color: gray;"></i>
+                </div>
+            `
+                divP.append(newDiv);
+            });
+        }
     }
+    $('.carousel').carousel({
+            interval: false
+        });
 </script>
 <script>
     $(document).ready(function() {
@@ -221,7 +245,7 @@
                         </li>
                     </ul>
                     </div>
-                    `);
+                `);
             }
         }
     });

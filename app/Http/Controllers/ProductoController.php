@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Imports\ProductoImport;
 use App\Models\Adicional;
 use App\Models\CategoriaProducto;
 use Illuminate\Http\Request;
@@ -35,37 +34,51 @@ class ProductoController extends Controller
         $productos_imagen = [];
         if ($category !== null) {
             $producto_category = true;
-            if($user->roles->id === 2) {
+            if ($user->roles->id === 2) {
                 //productos con categorias
                 $productos = CategoriaProducto::where('categoria_id', $category)->whereHas('producto', function ($q) {
                     $q->where('state', 1);
                 })->with('producto')->paginate(6);
                 //productos con imagen
                 $productos_imagen = ProductoImagen::groupBy('producto_id')->get();
-            }else {
+                if(count($productos_imagen) === 0) {
+                    dd($productos_imagen);
+                }
+            } else {
                 //productos con categorias
                 $productos = CategoriaProducto::where('categoria_id', $category)->whereHas('producto', function ($q) use ($user) {
                     $q->where('state', 1)->where('user_id', $user->id);
                 })->with('producto')->paginate(6);
 
                 //productos con imagen
-                $productos_imagen = ProductoImagen::whereHas('producto', function($q) use ($user) {
+                $productos_imagen = ProductoImagen::whereHas('producto', function ($q) use ($user) {
                     $q->where('user_id', $user->id)->where('state', 1);
                 })->groupBy('producto_id')->get();
+                if(count($productos_imagen) === 0) {
+                    dd($productos_imagen);
+                }
             }
         } else {
             if ($user->roles->id === 7) {
-                // $productos = Producto::where('user_id', $user->id)->where('state', 1)->paginate(6);
-                $productos = ProductoImagen::whereHas('producto', function($q) use ($user) {
+                $productos = ProductoImagen::whereHas('producto', function ($q) use ($user) {
                     $q->where('user_id', $user->id)->where('state', 1);
                 })->with('producto')->groupBy('producto_id')->paginate(6);
+                if(count($productos) === 0) {
+                    $productos = Producto::where('user_id', $user->id)->where('state', 1)->paginate(6);
+                }
             } elseif ($user->roles->id === 3) {
                 $getUser = User::find($user->id);
-                $productos = ProductoImagen::whereHas('producto', function($q) use ($getUser) {
+                $productos = ProductoImagen::whereHas('producto', function ($q) use ($getUser) {
                     $q->where('user_id', $getUser->id)->where('state', 1);
                 })->with('producto')->groupBy('producto_id')->paginate(6);
+                if(count($productos) === 0) {
+                    $productos = Producto::where('user_id', $getUser->user_id)->where('state', 1)->paginate(6);
+                }
             } elseif ($user->roles->id === 2) {
                 $productos = ProductoImagen::with('producto')->groupBy('producto_id')->paginate(6);
+                if(count($productos) === 0) {
+                    $productos = Producto::paginate(6);
+                }
             }
         }
         return view('productos.index', compact('name', 'icon', 'productos', 'categories', 'producto_category', 'productos_imagen'));
@@ -76,7 +89,7 @@ class ProductoController extends Controller
         $user = \Auth::user();
         if ($user->roles->id === 2) {
             if ($state !== null) {
-                $productos = ProductoImagen::whereHas('producto', function($q) use ($state) {
+                $productos = ProductoImagen::whereHas('producto', function ($q) use ($state) {
                     $q->where('state', $state);
                 })->with('producto')->groupBy('producto_id')->paginate(6);
                 $name = 'Productos';
@@ -96,7 +109,7 @@ class ProductoController extends Controller
         if ($this->isFranquiciado() || $user->roles->id === 2 || $user->roles->id === 3) {
             if ($search !== null) {
 
-                $productos = ProductoImagen::whereHas('producto', function($q) use ($search) {
+                $productos = ProductoImagen::whereHas('producto', function ($q) use ($search) {
                     $q->where('producto', 'LIKE', "%$search%")->where('state', 1);
                 })->with('producto')->groupBy('producto_id')->paginate(6);
                 $name = 'Productos';
@@ -137,7 +150,7 @@ class ProductoController extends Controller
         $sub = 'Editar';
         $icon = 'fa fa-shopping-cart mr-1';
         $categories = Category::all();
-        $producto = ProductoImagen::whereHas('producto', function ($q) use($id) {
+        $producto = ProductoImagen::whereHas('producto', function ($q) use ($id) {
             $q->where('id', $id)->where('state', 1);
         })->with('producto')->get();
         $adicionales = Adicional::where('producto_id', $id)->get();
@@ -157,6 +170,26 @@ class ProductoController extends Controller
             $tiendas = Tienda::all();
         }
         return view('productos.edit', compact('name', 'sub', 'icon', 'categories', 'producto', 'tiendas', 'adicionales', 'product_quantity', 'riide'));
+    }
+
+    public function editImageProd($id, Request $request)
+    {
+        $new_image = $request->file('new_image' . $id);
+        $producto = ProductoImagen::where('id', $id)->first();
+        if ($new_image) {
+            $file_name = $new_image->getClientOriginalName();
+            Storage::disk('productos')->put($file_name, File::get($new_image));
+            $producto->imagen = $file_name;
+            $producto->update();
+        }
+        return redirect()->route('edit.producto', ['id' => $producto->producto_id]);
+    }
+
+    public function eliminaImagenProd($id){
+        $producto = ProductoImagen::where('id', $id)->first();
+        $pr = Producto::where('id', $producto->producto_id)->first();
+        ProductoImagen::where('id', $id)->delete();
+        return redirect()->route('edit.producto', ['id' => $pr->id]);
     }
 
     public function editProducto($id, Request $request)
@@ -236,7 +269,7 @@ class ProductoController extends Controller
             'precio_b' => $request->input('precio_b'),
             'state' => 1,
             'user_id' => $user->user_id
-            ]);
+        ]);
 
         if ($image_path) {
             foreach ($image_path as $key =>  $imagen) {
@@ -313,5 +346,4 @@ class ProductoController extends Controller
             return false;
         }
     }
-
 }

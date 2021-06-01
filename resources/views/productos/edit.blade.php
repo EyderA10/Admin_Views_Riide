@@ -183,36 +183,66 @@
     }
 
     $(document).ready(function () {
-    producto = {!! $producto_imagenes !!};
-    if(producto[0].imagen) {
-        $('#insert-image').css('width', '350px');
-        $('#insert-image').append(`
-            <div id="carouselExampleControls" class="carousel slide w-100 h-100" data-ride="carousel">
-                <div id="insert-imagen-two" class="carousel-inner">
-                </div>
-                <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
-                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                    <span class="sr-only">Previous</span>
-                </a>
-                <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
-                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                    <span class="sr-only">Next</span>
-                </a>
-            </div>
-        `);
-        for (let i = 0; i < producto.length; i++) {
-            $("#insert-imagen-two").append(`
-                <div class="carousel-item ${i === 0 ? 'active' : ''}">
-                    <img src="/admin/image-prod/${producto[i].imagen}" class="d-block w-100" height="200px" alt="imagen_producto${i}">
-                    <div class="w-100" style="text-align: right;">
-                        <i id="delete-imagen" class="fas fa-times text-danger" style="font-size: 20px;"></i>
-                        <i id="edita-imagen" class="fas fa-pen-square text-primary ml-2" style="font-size: 20px;"></i>
+        producto = {!! $producto_imagenes !!};
+        if(producto[0].imagen) {
+            $('#insert-image').css('width', '350px');
+            $('#insert-image').append(`
+                <div id="carouselExampleControls" class="carousel slide w-100 h-100" data-ride="carousel">
+                    <div id="insert-imagen-two" class="carousel-inner">
                     </div>
+                    <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="sr-only">Previous</span>
+                    </a>
+                    <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="sr-only">Next</span>
+                    </a>
                 </div>
             `);
+            for (let i = 0; i < producto.length; i++) {
+                $("#insert-imagen-two").append(`
+                    <div class="carousel-item ${i === 0 ? 'active' : ''}">
+                        <img src="/admin/image-prod/${producto[i].imagen}" class="d-block w-100" height="200px" alt="imagen_producto${i}">
+                        <div class="w-100" style="text-align: right;">
+                            <i id="delete-imagen" onclick="handleDeleteImagen(${producto[i].id})" class="fas fa-times text-danger" style="font-size: 20px;"></i>
+                            <i id="edita-imagen" onclick="document.querySelector('#new_image${producto[i].id}').click()" class="fas fa-pen-square text-primary ml-2" style="font-size: 20px;"></i>
+                            <input type="file" onchange="handleChange(${ producto[i].id })" name="new_image${producto[i].id}" id="new_image${producto[i].id}" style="display: none;"/>
+                        </div>
+                    </div>
+                `);
+            }
+        }else {
+            const divP = document.querySelector('#insert-image');
+            let newDiv = document.createElement('div');
+            newDiv.style.width = '250px';
+            newDiv.style.height = '180px';
+            newDiv.style.backgroundColor = 'white';
+            newDiv.className = 'd-flex align-items-center';
+            newDiv.id = 'div-icon-image';
+            newDiv.innerHTML = `
+            <div style="width: 30%;  margin: 0 auto">
+                <i class="far fa-image" style="font-size: 60px; color: gray;"></i>
+            </div>
+        `
+            divP.append(newDiv);
         }
+        $('.carousel').carousel({
+            interval: false
+        });
+    });
+
+    function handleChange(id) {
+        let url = "http://localhost:8000/admin";
+        $("#form").attr("action", `${url}/editar-prod-img/${id}`);
+        $("#form").submit();
     }
-});
+
+    function handleDeleteImagen(id) {
+        let url = "http://localhost:8000/admin";
+        $("#form").attr("action", `${url}/eliminar-prod-img/${id}`);
+        $("#form").submit();
+    }
 
     function handleChangeMultiple(e) {
         console.log(e);
@@ -247,64 +277,53 @@
             }
             reader.readAsDataURL(file);
         }
-    }
-
-    if($("#delete-carrousel")) {
-        $("#delete-carrousel").on('click', function () {
-            $('#insert-image').empty();
-            $('#insert-image').css('width', '350px');
-            $('#insert-image').append(`
-                <div id="carouselExampleControls" class="carousel slide w-100 h-100" data-ride="carousel">
-                    <div id="insert-imagen-two" class="carousel-inner">
-                    </div>
-                    <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
-                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                        <span class="sr-only">Previous</span>
-                    </a>
-                    <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
-                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                        <span class="sr-only">Next</span>
-                    </a>
-                </div>
-            `);
-            for (let i = 0; i < producto.length; i++) {
-                $("#insert-imagen-two").append(`
-                    <div class="carousel-item ${i === 0 ? 'active' : ''}">
-                        <img src="/admin/image-prod/${producto[i].imagen}" class="d-block w-100" height="200px" alt="imagen_producto${i}">
-                        <div class="w-100" style="text-align: right;">
-                            <i id="delete-imagen" class="fas fa-times text-danger" style="font-size: 20px;"></i>
-                            <i id="edita-imagen" class="fas fa-pen-square text-primary ml-2" style="font-size: 20px;"></i>
+            if($("#delete-carrousel")) {
+            $("#delete-carrousel").on('click', function () {
+                $('#insert-image').empty();
+                $('#insert-image').css('width', '350px');
+                if(producto[0].imagen){
+                    $('#insert-image').append(`
+                        <div id="carouselExampleControls" class="carousel slide w-100 h-100" data-ride="carousel">
+                            <div id="insert-imagen-two" class="carousel-inner">
+                            </div>
+                            <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="sr-only">Previous</span>
+                            </a>
+                            <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="sr-only">Next</span>
+                            </a>
                         </div>
+                    `);
+                    for (let i = 0; i < producto.length; i++) {
+                        $("#insert-imagen-two").append(`
+                            <div class="carousel-item ${i === 0 ? 'active' : ''}">
+                                <img src="/admin/image-prod/${producto[i].imagen}" class="d-block w-100" height="200px" alt="imagen_producto${i}">
+                                <div class="w-100" style="text-align: right;">
+                                    <i id="delete-imagen" class="fas fa-times text-danger" style="font-size: 20px;"></i>
+                                    <i id="edita-imagen" onclick="document.querySelector('#new_image${producto[i].id}').click()" class="fas fa-pen-square text-primary ml-2" style="font-size: 20px;"></i>
+                                    <input type="file" onchange="handleChange(${ producto[i].id })" name="new_image${producto[i].id}" id="new_image${producto[i].id}" style="display: none;"/>
+                                </div>
+                            </div>
+                        `);
+                    }
+                }else {
+                    const divP = document.querySelector('#insert-image');
+                    let newDiv = document.createElement('div');
+                    newDiv.style.width = '250px';
+                    newDiv.style.height = '180px';
+                    newDiv.style.backgroundColor = 'white';
+                    newDiv.className = 'd-flex align-items-center';
+                    newDiv.id = 'div-icon-image';
+                    newDiv.innerHTML = `
+                    <div style="width: 30%;  margin: 0 auto">
+                        <i class="far fa-image" style="font-size: 60px; color: gray;"></i>
                     </div>
-                `);
-            }
-        });
-    }
-
-    function handleChange(e) {
-        // console.log(e.files);
-        let reader = new FileReader();
-        const fileName = e.files[0];
-        reader.readAsDataURL(fileName);
-        reader.onload = function() {
-            const divP = document.querySelector('#insert-image');
-            let divLast = document.querySelector('#div-icon-image');
-            let newDiv = document.createElement('div');
-            newDiv.style.width = '250px';
-            newDiv.style.height = '180px';
-            newDiv.className = 'd-flex';
-            newDiv.innerHTML = `
-            <img src="${reader.result}" alt='file-selected' width="100%" height="100%"/>
-            <i id="delete-file" class="fas fa-times text-danger ml-2" style="font-size: 20px;"></i>
-        `;
-            divP.replaceChild(newDiv, divLast);
-            if (reader.result) {
-                document.getElementById('delete-file').style.cursor = 'pointer';
-                document.getElementById('delete-file').onclick = (e) => {
-                    document.getElementById('image').value = "";
-                    divP.replaceChild(divLast, newDiv);
+                `
+                    divP.append(newDiv);
                 }
-            }
+            });
         }
     }
 </script>

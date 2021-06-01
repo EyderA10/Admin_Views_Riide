@@ -59,6 +59,10 @@ Route::prefix('admin')->group(function () {
     Route::get('/delete-producto/{id}', 'ProductoController@deleteProduct')->name('delete.prod');
     Route::post('/update-producto/{id}', 'ProductoController@editProducto')->name('update.producto');
 
+    //editando imagenes de productos
+    Route::post('/editar-prod-img/{id}', 'ProductoController@editImageProd')->name('editando.imagen');
+    Route::post('/eliminar-prod-img/{id}', 'ProductoController@eliminaImagenProd')->name('eliminando.imagen');
+
     //banners
     Route::get('/banners','BannerController@index')->name('all.banners');
 
