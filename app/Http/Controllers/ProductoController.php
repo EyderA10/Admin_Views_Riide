@@ -307,11 +307,11 @@ class ProductoController extends Controller
             foreach ($image_path as $key =>  $imagen) {
                 $file_name = $imagen->getClientOriginalName();
                 Storage::disk('productos')->put($file_name, File::get($imagen));
-                ProductoImagen::create([
-                    'producto_id' => $producto->id,
-                    'imagen' => $file_name,
-                    'orden' => $key
-                ]);
+                $producto_img = new ProductoImagen();
+                $producto_img->producto_id = $producto->id;
+                $producto_img->imagen = $file_name;
+                $producto_img->orden = $key;
+                $producto_img->save();
             }
         } else {
             return redirect()->route('create.producto');
