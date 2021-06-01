@@ -300,7 +300,7 @@ class ProductoController extends Controller
             'precio_a' => $request->input('precio_a'),
             'precio_b' => $request->input('precio_b'),
             'state' => 1,
-            'user_id' => $user->user_id
+            'user_id' => $user->user_id 
         ]);
 
         if ($image_path) {
