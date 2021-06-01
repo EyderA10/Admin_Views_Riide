@@ -35,7 +35,7 @@
             </div>
         </div>
     </div>
-    @if (count($productos) === 0 && Auth::user()->roles->id === 7 && Auth::user()->roles->id === 3)
+    @if (count($productos) === 0)
     <div class="text-center d-flex mx-auto mt-3" style="background-color: white; width: 250px; height: 250px; border-radius: 10px; margin-bottom: 50px;">
         <div class="m-auto">
             <i class="fa fa-shopping-cart" style="font-size: 50px; color: gray;"></i>
@@ -51,14 +51,16 @@
                     @php
                         if($producto_category) {
                             $producto = $producto->producto;
-                            if ($producto->id === $productos_imagen[$key]->producto_id) {
+                            if ($productos_imagen[$key]->producto_id && $producto->id === $productos_imagen[$key]->producto_id) {
                                 $imagen = $productos_imagen[$key]->imagen;
+                                $prod_img = true;
                             } else {
                                 $imagen = null;
                             }
                         }else {
                             $producto = $producto;
                             $imagen = null;
+                            $prod_img = false;
                         }
                     @endphp
                     @if ($producto !== null)
@@ -77,7 +79,7 @@
                                             <img src="{{route('imagen.prod', ['imagen' => $producto->imagen])}}" height="250px" class="card-img-top p-2" alt="user-image">
                                             @endif
                                             @php
-                                                if(!$producto_category) {
+                                                if(!$producto_category && $prod_img) {
                                                     $producto = $producto->producto;
                                                 }
                                             @endphp

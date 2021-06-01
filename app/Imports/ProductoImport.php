@@ -44,7 +44,7 @@ class ProductoImport implements ToModel, WithHeadingRow, WithBatchInserts, WithC
                 'precio_b' => $row['precio_b'],
                 'imagen' => $row['imagen'],
                 'state' => 1,
-                'user_id' => $user->id
+                'user_id' => $user->user_id
             ]);
             if (count($tiendas) > 0) {
                 foreach ($tiendas as $tienda) {

@@ -3,8 +3,12 @@
 @section('content')
 @include('includes.navbar', compact('name', 'icon', 'sub'))
 @php
-    $producto_imagenes = $producto;
-    $producto = $producto[0]->producto;
+    if(!is_object($producto) && count($producto) > 0){
+        $producto_imagenes = $producto;
+        $producto = $producto[0]->producto;
+    }else {
+        $producto_imagenes = "null";
+    }
 @endphp
 <div class="container" style="margin-top: -25px;">
     <form id="form" action="{{route('update.producto', ['id' => $producto->id])}}" method="POST" class="form-signin" enctype="multipart/form-data">
@@ -184,7 +188,7 @@
 
     $(document).ready(function () {
         producto = {!! $producto_imagenes !!};
-        if(producto[0].imagen) {
+        if(producto !== null) {
             $('#insert-image').css('width', '350px');
             $('#insert-image').append(`
                 <div id="carouselExampleControls" class="carousel slide w-100 h-100" data-ride="carousel">
@@ -212,8 +216,12 @@
                     </div>
                 `);
             }
+        $('.carousel').carousel({
+            interval: false
+        });
         }else {
             const divP = document.querySelector('#insert-image');
+            console.log(divP);
             let newDiv = document.createElement('div');
             newDiv.style.width = '250px';
             newDiv.style.height = '180px';
@@ -227,9 +235,6 @@
         `
             divP.append(newDiv);
         }
-        $('.carousel').carousel({
-            interval: false
-        });
     });
 
     function handleChange(id) {
@@ -281,7 +286,7 @@
             $("#delete-carrousel").on('click', function () {
                 $('#insert-image').empty();
                 $('#insert-image').css('width', '350px');
-                if(producto[0].imagen){
+                if(producto){
                     $('#insert-image').append(`
                         <div id="carouselExampleControls" class="carousel slide w-100 h-100" data-ride="carousel">
                             <div id="insert-imagen-two" class="carousel-inner">
